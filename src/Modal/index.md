@@ -11,46 +11,6 @@ title: Modal
 
 需要用户处理事务，又不希望跳转页面以致打断工作流程时，可以使用 `Modal` 在当前页面正中打开一个浮层，承载相应的操作。
 
-## API
-
-| 参数                | 说明                                                                                                           | 类型                                               | 默认值         | 版本 |
-| ------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | -------------- | ---- |
-| afterClose          | Modal 完全关闭后的回调                                                                                         | function                                           | 无             |      |
-| bodyStyle           | Modal body 样式                                                                                                | React.CSSProperties                                | 无             |      |
-| buttons             | 定义 footer 下的按钮展示                                                                                       | cancel \| ok \| string[] \| ReactNode[]            | 无             |      |
-| cancelText          | 取消按钮文字                                                                                                   | string \| ReactNode                                | Cancel         |      |
-| centered            | 垂直居中展示 Modal                                                                                             | Boolean                                            | `true`         |      |
-| closable            | 是否显示右上角的关闭按钮                                                                                       | boolean                                            | true           |      |
-| closeIcon           | 自定义关闭图标                                                                                                 | ReactNode                                          | -              |      |
-| closeIconStyle      | 自定义关闭图标样式                                                                                             | React.CSSProperties                                | 无             |      |
-| confirmLoading      | 确定按钮 loading                                                                                               | boolean                                            | 无             |      |
-| destroyOnClose      | 关闭时销毁 Modal 里的子元素                                                                                    | boolean                                            | false          |      |
-| footer              | 可以传新的 ReactNode 完全自定义底部内容; 可以传`footer={null}`取消底部; 可以传函数保留取消按钮和确认按钮的引用 | string \| ReactNode \| (buttons: any[])=>ReactNode | 确定和取消按钮 |      |
-| footerStyle         | 设置页脚的样式                                                                                                 | React.CSSProperties                                | 无             |      |
-| fullScreen          | 设置弹窗为全屏样式                                                                                             | boolean                                            | false          |      |
-| keyboard            | 是否支持键盘 esc 关闭                                                                                          | boolean                                            | true           |      |
-| mask                | 是否展示遮罩                                                                                                   | Boolean                                            | true           |      |
-| maskClosable        | 点击蒙层是否允许关闭                                                                                           | boolean                                            | true           |      |
-| maskStyle           | 遮罩样式                                                                                                       | object                                             | {}             |      |
-| okText              | 确认按钮文字                                                                                                   | string \| ReactNode                                | 确定           |      |
-| okButtonProps       | ok 按钮 props                                                                                                  | `@mui/material/Button/ButtonProps`                 | -              |      |
-| cancelButtonProps   | cancel 按钮 props                                                                                              | `@mui/material/Button/ButtonProps`                 | -              |      |
-| style               | 可用于设置浮层的样式，调整浮层位置等                                                                           | React.CSSProperties                                | -              |      |
-| title               | 标题                                                                                                           | string \| ReactNode                                | 无             |      |
-| titleStyle          | 设置标题样式调                                                                                                 | function                                           | 无             |      |
-| top                 | 设置弹窗浮层距离顶部的高度                                                                                     | string \| number                                   | 无             |      |
-| transitionDirection | 设置弹窗显示的方向动画                                                                                         | left \| right \| top \| bottom                     | 无             |      |
-| type                | 设置弹窗为抽屉形式                                                                                             | drawer \| modal                                    | 无             |      |
-| visible             | 对话框是否可见                                                                                                 | boolean                                            | 无             |      |
-| width               | 宽度                                                                                                           | string \| number                                   | 520            |      |
-| zIndex              | 设置 Modal 的 `z-index`                                                                                        | Number                                             | 3000           |      |
-| onCancel            | 点击遮罩层或右上角叉或取消按钮的回调                                                                           | function(e)                                        | 无             |      |
-| onOk                | 点击确定回调                                                                                                   | function(e)                                        | 无             |      |
-
-#### 注意
-
-> `<Modal />` 默认关闭后状态不会自动清空, 如果希望每次打开都是新内容，请设置 `destroyOnClose`。
-
 ## 代码演示
 
 ### 基本
@@ -100,3 +60,43 @@ title: Modal
 ### 抽屉弹窗
 
 <code title='抽屉弹窗' desc='使用`type=drawer`弹窗将以抽屉的模式展示,可以在简单的抽屉场景下使用,其余api均和Modal保持一致' src='./demo/drawerType.tsx'></code>
+
+## API
+
+| 参数                | 说明                                                                                                           | 类型                                               | 默认值         | 版本 |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | -------------- | ---- |
+| afterClose          | Modal 完全关闭后的回调                                                                                         | function                                           | 无             |      |
+| bodyStyle           | Modal body 样式                                                                                                | React.CSSProperties                                | 无             |      |
+| buttons             | 定义 footer 下的按钮展示                                                                                       | cancel \| ok \| string[] \| ReactNode[]            | 无             |      |
+| cancelText          | 取消按钮文字                                                                                                   | string \| ReactNode                                | Cancel         |      |
+| centered            | 垂直居中展示 Modal                                                                                             | Boolean                                            | `true`         |      |
+| closable            | 是否显示右上角的关闭按钮                                                                                       | boolean                                            | true           |      |
+| closeIcon           | 自定义关闭图标                                                                                                 | ReactNode                                          | -              |      |
+| closeIconStyle      | 自定义关闭图标样式                                                                                             | React.CSSProperties                                | 无             |      |
+| confirmLoading      | 确定按钮 loading                                                                                               | boolean                                            | 无             |      |
+| destroyOnClose      | 关闭时销毁 Modal 里的子元素                                                                                    | boolean                                            | false          |      |
+| footer              | 可以传新的 ReactNode 完全自定义底部内容; 可以传`footer={null}`取消底部; 可以传函数保留取消按钮和确认按钮的引用 | string \| ReactNode \| (buttons: any[])=>ReactNode | 确定和取消按钮 |      |
+| footerStyle         | 设置页脚的样式                                                                                                 | React.CSSProperties                                | 无             |      |
+| fullScreen          | 设置弹窗为全屏样式                                                                                             | boolean                                            | false          |      |
+| keyboard            | 是否支持键盘 esc 关闭                                                                                          | boolean                                            | true           |      |
+| mask                | 是否展示遮罩                                                                                                   | Boolean                                            | true           |      |
+| maskClosable        | 点击蒙层是否允许关闭                                                                                           | boolean                                            | true           |      |
+| maskStyle           | 遮罩样式                                                                                                       | object                                             | {}             |      |
+| okText              | 确认按钮文字                                                                                                   | string \| ReactNode                                | 确定           |      |
+| okButtonProps       | ok 按钮 props                                                                                                  | `@mui/material/Button/ButtonProps`                 | -              |      |
+| cancelButtonProps   | cancel 按钮 props                                                                                              | `@mui/material/Button/ButtonProps`                 | -              |      |
+| style               | 可用于设置浮层的样式，调整浮层位置等                                                                           | React.CSSProperties                                | -              |      |
+| title               | 标题                                                                                                           | string \| ReactNode                                | 无             |      |
+| titleStyle          | 设置标题样式调                                                                                                 | function                                           | 无             |      |
+| top                 | 设置弹窗浮层距离顶部的高度                                                                                     | string \| number                                   | 无             |      |
+| transitionDirection | 设置弹窗显示的方向动画                                                                                         | left \| right \| top \| bottom                     | 无             |      |
+| type                | 设置弹窗为抽屉形式                                                                                             | drawer \| modal                                    | 无             |      |
+| visible             | 对话框是否可见                                                                                                 | boolean                                            | 无             |      |
+| width               | 宽度                                                                                                           | string \| number                                   | 520            |      |
+| zIndex              | 设置 Modal 的 `z-index`                                                                                        | Number                                             | 3000           |      |
+| onCancel            | 点击遮罩层或右上角叉或取消按钮的回调                                                                           | function(e)                                        | 无             |      |
+| onOk                | 点击确定回调                                                                                                   | function(e)                                        | 无             |      |
+
+#### 注意
+
+> `<Modal />` 默认关闭后状态不会自动清空, 如果希望每次打开都是新内容，请设置 `destroyOnClose`。

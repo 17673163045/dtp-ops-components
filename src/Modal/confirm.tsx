@@ -32,6 +32,7 @@ const ConfirmModal = (props: ModalProps) => {
 
   return (
     <Modal
+      destroyOnClose
       top={100}
       closable={false}
       maskClosable={false}
