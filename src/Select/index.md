@@ -31,9 +31,9 @@ title: Select
 
 <code desc='`showSearch`设置为`true`对选项进行过滤搜索,`默认的过滤规则`是将输入的字符`转换小写`匹配Option的label文本,可以传入`filterOption`自定义过滤规则,也可以设置`filterOption`为`false`不过滤' src='./demo/showSearch.tsx'></code>
 
-### 带搜索框,过滤 Option
+### 异步
 
-<code desc='' src='./demo/asyncSearch.tsx'></code>
+<code desc='搜索框输入异步获取数据' src='./demo/asyncSearch.tsx'></code>
 
 ## API
 
