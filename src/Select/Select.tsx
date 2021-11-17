@@ -8,10 +8,15 @@ type OptionValue = string | number;
 export interface SelectProps {
   allowClear?: boolean;
   clearIcon?: any;
+  defaultActiveFirstOption?: boolean;
   defaultOpen?: boolean;
   defaultValue?: string | number | string[] | number[] | [];
   disabled?: boolean;
   disableCloseOnSelect?: boolean;
+  dropdownClassName?: string;
+  dropdownMatchSelectWidth?: boolean;
+  dropdownStyle?: React.CSSProperties;
+  dropdownRender?: (menu: any) => any;
   filterOption?: false | ((inputValue: string, option: Option) => boolean);
   getOptionDisabled?: (option: Option) => boolean;
   getOptionLabel?: (
@@ -47,15 +52,29 @@ export interface SelectProps {
 }
 
 import React from 'react';
-import { TextField, Autocomplete, CircularProgress } from '@mui/material';
+import {
+  Popper,
+  TextField,
+  Autocomplete,
+  CircularProgress,
+} from '@mui/material';
+import styles from './Select.less';
+
 const defaultOptions: any[] = [];
+
+const PopperComponentContext = React.createContext<any>(undefined);
 
 function Select(props: SelectProps) {
   const {
     allowClear = false,
     clearIcon: clearIconFp,
+    defaultActiveFirstOption = true,
     defaultOpen,
     disableCloseOnSelect: disableCloseOnSelectFp,
+    dropdownClassName,
+    dropdownMatchSelectWidth,
+    dropdownStyle,
+    dropdownRender,
     filterOption,
     getOptionDisabled: getOptionDisabledFp,
     getOptionLabel: getOptionLabelFp,
@@ -188,7 +207,13 @@ function Select(props: SelectProps) {
   ) {
     const option = optionValueMapItem[`${optionValue}.${typeof optionValue}`];
     if (renderOptionFp) return renderOptionFp(props, option, state);
-    return <li {...props}>{getOptionLabel(option, state)}</li>;
+    return (
+      <li {...props}>
+        <div className={styles.labelTextContainer}>
+          {getOptionLabel(option, state)}
+        </div>
+      </li>
+    );
   }
 
   function getOptionDisabled(optionValue: OptionValue): boolean {
@@ -219,66 +244,114 @@ function Select(props: SelectProps) {
     return defaultFilteredOptions;
   }
 
-  function onInputChange(e: any, reason: any) {
+  function onInputChange(e: any, newValue: any, reason: any) {
+    console.log(reason);
     const inputValue = (e && e.target && e.target.value) || '';
     if (onSearch) {
       onSearch(inputValue);
     }
   }
 
+  const popperComponentProps = {
+    dropdownClassName,
+    dropdownMatchSelectWidth,
+    dropdownStyle,
+    dropdownRender,
+  };
+
   return (
-    <Autocomplete
-      clearIcon={clearIcon}
-      disableCloseOnSelect={disableCloseOnSelect}
-      filterOptions={filterOptions}
-      getOptionDisabled={getOptionDisabled}
-      getOptionLabel={getInputFillText}
-      loading={loading}
-      loadingText={loadingText}
-      multiple={multiple}
-      noOptionsText={notFoundContent}
-      onChange={onChange}
-      onClose={onClose}
-      onOpen={onOpen}
-      open={open}
-      options={valueList}
-      onInputChange={onInputChange}
-      inputValue={searchValue}
-      size={size}
-      renderInput={(params) => {
-        const override_inputProps: any = {};
-        if (!showSearch) {
-          override_inputProps.unselectable = 'on';
-          override_inputProps.readOnly = true;
-        }
+    <PopperComponentContext.Provider value={popperComponentProps}>
+      <Autocomplete
+        PopperComponent={PopperComponent}
+        autoHighlight={!!defaultActiveFirstOption}
+        clearIcon={clearIcon}
+        disableCloseOnSelect={disableCloseOnSelect}
+        filterOptions={filterOptions}
+        getOptionDisabled={getOptionDisabled}
+        getOptionLabel={getInputFillText}
+        loading={loading}
+        loadingText={loadingText}
+        multiple={multiple}
+        noOptionsText={notFoundContent}
+        onChange={onChange}
+        onClose={onClose}
+        onOpen={onOpen}
+        open={open}
+        options={valueList}
+        onInputChange={onInputChange}
+        inputValue={searchValue}
+        size={size}
+        renderInput={(params) => {
+          const override_inputProps: any = {};
+          if (!showSearch) {
+            override_inputProps.unselectable = 'on';
+            override_inputProps.readOnly = true;
+          }
 
-        const override_InputProps: any = {};
-        override_InputProps.endAdornment = loading ? (
-          <CircularProgress
-            color="primary"
-            size={20}
-            style={{ position: 'absolute', right: 6 }}
-          />
-        ) : (
-          params.InputProps.endAdornment
-        );
+          const override_InputProps: any = {};
+          override_InputProps.endAdornment = loading ? (
+            <CircularProgress
+              color="primary"
+              size={20}
+              style={{ position: 'absolute', right: 6 }}
+            />
+          ) : (
+            params.InputProps.endAdornment
+          );
 
-        return (
-          <TextField
-            placeholder={placeholder}
-            label={label}
-            variant="outlined"
-            {...params}
-            InputProps={{
-              ...params.InputProps,
-              ...override_InputProps,
-            }}
-            inputProps={{ ...params.inputProps, ...override_inputProps }}
-          />
-        );
-      }}
-      renderOption={renderOption}
-      {...valueProp}
+          return (
+            <TextField
+              placeholder={placeholder}
+              label={label}
+              variant="outlined"
+              {...params}
+              InputProps={{
+                ...params.InputProps,
+                ...override_InputProps,
+              }}
+              inputProps={{ ...params.inputProps, ...override_inputProps }}
+            />
+          );
+        }}
+        renderOption={renderOption}
+        {...valueProp}
+        {...restProps}
+      />
+    </PopperComponentContext.Provider>
+  );
+}
+
+function PopperComponent(props: any) {
+  const {
+    className: classNameFp,
+    style: styleFp,
+    children,
+    ...restProps
+  } = props;
+
+  const {
+    dropdownClassName,
+    dropdownMatchSelectWidth = true,
+    dropdownRender,
+    dropdownStyle,
+  } = React.useContext(PopperComponentContext) || {};
+
+  const className = `${dropdownClassName} ${classNameFp} ${
+    !dropdownMatchSelectWidth && styles.dropdownNotMatchSelectWidth
+  }`
+    .replaceAll('undefined', '')
+    .replaceAll('null', '');
+
+  const style = dropdownStyle ? { ...styleFp, ...dropdownStyle } : styleFp;
+
+  const renderChildren =
+    typeof dropdownRender === 'function' ? dropdownRender(children) : children;
+
+  return (
+    <Popper
+      className={className}
+      style={style}
+      children={renderChildren}
       {...restProps}
     />
   );

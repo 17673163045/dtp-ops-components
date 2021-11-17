@@ -59,7 +59,7 @@ title: Modal
 
 ### 抽屉弹窗
 
-<code title='抽屉弹窗' desc='使用`type=drawer`弹窗将以抽屉的模式展示,可以在简单的抽屉场景下使用,其余api均和Modal保持一致' src='./demo/drawerType.tsx'></code>
+<code title='抽屉弹窗' desc='使用`type=drawer`弹窗将以抽屉的模式展示,其余api均和Modal保持一致' src='./demo/drawerType.tsx'></code>
 
 ## API
 
@@ -82,7 +82,7 @@ title: Modal
 | mask                | 是否展示遮罩                                                                                                   | Boolean                                            | true           |      |
 | maskClosable        | 点击蒙层是否允许关闭                                                                                           | boolean                                            | true           |      |
 | maskStyle           | 遮罩样式                                                                                                       | object                                             | {}             |      |
-| okText              | 确认按钮文字                                                                                                   | string \| ReactNode                                | 确定           |      |
+| okText              | 确认按钮文字                                                                                                   | string \| ReactNode                                | Confirm        |      |
 | okButtonProps       | ok 按钮 props                                                                                                  | `@mui/material/Button/ButtonProps`                 | -              |      |
 | cancelButtonProps   | cancel 按钮 props                                                                                              | `@mui/material/Button/ButtonProps`                 | -              |      |
 | style               | 可用于设置浮层的样式，调整浮层位置等                                                                           | React.CSSProperties                                | -              |      |
@@ -90,10 +90,10 @@ title: Modal
 | titleStyle          | 设置标题样式调                                                                                                 | function                                           | 无             |      |
 | top                 | 设置弹窗浮层距离顶部的高度                                                                                     | string \| number                                   | 无             |      |
 | transitionDirection | 设置弹窗显示的方向动画                                                                                         | left \| right \| top \| bottom                     | 无             |      |
-| type                | 设置弹窗为抽屉形式                                                                                             | drawer \| modal                                    | 无             |      |
+| type                | 设置弹窗为抽屉形式                                                                                             | drawer \| modal                                    | modal          |      |
 | visible             | 对话框是否可见                                                                                                 | boolean                                            | 无             |      |
 | width               | 宽度                                                                                                           | string \| number                                   | 520            |      |
-| zIndex              | 设置 Modal 的 `z-index`                                                                                        | Number                                             | 3000           |      |
+| zIndex              | 设置 Modal 的 `z-index`                                                                                        | Number                                             | 1300           |      |
 | onCancel            | 点击遮罩层或右上角叉或取消按钮的回调                                                                           | function(e)                                        | 无             |      |
 | onOk                | 点击确定回调                                                                                                   | function(e)                                        | 无             |      |
 

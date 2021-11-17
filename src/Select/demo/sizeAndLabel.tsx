@@ -9,11 +9,11 @@ const options = [
 ];
 
 function SizeAndLabel() {
-  const [size, setSize] = React.useState<any>('small');
+  const [size, setSize] = React.useState<any>('default');
   const [label, setLabel] = React.useState<any>();
 
   return (
-    <div>
+    <div style={{ display: 'inline-block', width: '50%' }}>
       <div style={{ marginBottom: 20 }}>
         <Button
           style={{ marginRight: 20 }}

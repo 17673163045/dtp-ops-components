@@ -1,7 +1,6 @@
 ---
 category: Components
-subtitle: 选择器
-type: 数据录入
+subtitle: Select
 title: Select
 ---
 
@@ -13,7 +12,39 @@ title: Select
 
 ## 代码演示
 
-### 基本
+### test
+
+<code src='./demo/test.tsx'></code>
+
+### allowClear
+
+<code src='./demo/allowClear.tsx'></code>
+
+### clearIcon
+
+<code src='./demo/clearIcon.tsx'></code>
+
+### defaultActiveFirstOption
+
+<code src='./demo/defaultActiveFirstOption.tsx'></code>
+
+### defaultOpen
+
+<code src='./demo/defaultOpen.tsx'></code>
+
+### defaultValue
+
+<code src='./demo/defaultValue.tsx'></code>
+
+### disabled
+
+<code src='./demo/disabled.tsx'></code>
+
+### dropdownClassName
+
+<code src='./demo/dropdownClassName.tsx'></code>
+
+<!-- ### 基本
 
 <code desc='传入`options any[]`，当options每一项是`数字`或者`字符串`时,label和value都是`options item`本身<br /><br />`options`每一项是`对象`时,默认将`label`属性作为下拉的显示`文本`，`value`属性作为下拉选中的`值`<br /><br />当对象没有label属性或者value属性时,可以使用`labelMap`和`valueMap` 为下拉项指定label和value' src='./demo/basic.tsx'></code>
 
@@ -33,9 +64,11 @@ title: Select
 
 ### 异步
 
-<code desc='搜索框输入异步获取数据' src='./demo/asyncSearch.tsx'></code>
+<code desc='搜索框输入异步获取数据' src='./demo/asyncSearch.tsx'></code> --> -->
 
 ## API
+
+### Select props
 
 | 参数                     | 说明                                                                                                                                                                        | 类型                                                                              | 默认值                                             | 版本             |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------- | ---------------- |

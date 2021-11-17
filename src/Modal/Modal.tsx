@@ -65,8 +65,11 @@ function Modal(props: ModalProps) {
     type,
   } = props;
 
-  const transitionDirection =
-    type === 'drawer' ? 'left' : transitionDirectionFp;
+  const transitionDirection = transitionDirectionFp
+    ? transitionDirectionFp
+    : type === 'drawer'
+    ? 'left'
+    : undefined;
 
   const { visible, close } = useModalVisible(outVisible);
 
@@ -394,6 +397,34 @@ export const useModalStyleOverride = (
     () => {
       const useCentered = centered && !fullScreen && !('top' in props);
       const isDrawerType = type === 'drawer';
+      const transitionHorizontal =
+        transitionDirection === 'left' || transitionDirection === 'right';
+      const transitionColumn =
+        transitionDirection === 'down' || transitionDirection === 'up';
+      const drawerTypeTransitionHorizontalStyle = {
+        height: '100%',
+        maxHeight: '100%',
+        borderRadius: 0,
+        position: 'absolute',
+        left: transitionDirection === 'right' ? 0 : undefined,
+        right: transitionDirection === 'left' ? 0 : undefined,
+      };
+      const drawerTypeTransitionColumnStyle = {
+        width: '100%',
+        maxWidth: '100%',
+        borderRadius: 0,
+        position: 'absolute',
+        top: transitionDirection === 'down' ? 0 : undefined,
+        bottom: transitionDirection === 'up' ? 0 : undefined,
+      };
+
+      const drawerTypeStyle = !isDrawerType
+        ? {}
+        : transitionHorizontal
+        ? drawerTypeTransitionHorizontalStyle
+        : transitionColumn
+        ? drawerTypeTransitionColumnStyle
+        : {};
 
       return styled(Dialog)(() => ({
         // root
@@ -432,16 +463,7 @@ export const useModalStyleOverride = (
                 minWidth: '100%',
               }
             : {}),
-          ...(isDrawerType
-            ? {
-                height: '100%',
-                maxHeight: '100%',
-                borderRadius: 0,
-                position: 'absolute',
-                left: transitionDirection === 'right' ? 0 : undefined,
-                right: transitionDirection === 'left' ? 0 : undefined,
-              }
-            : {}),
+          ...drawerTypeStyle,
           ...(style || {}),
         },
         // title

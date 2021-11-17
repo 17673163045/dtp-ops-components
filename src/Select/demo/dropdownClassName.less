@@ -1,0 +1,31 @@
+.dropdown {
+  background: #282b30;
+
+  :global {
+    ul.MuiAutocomplete-listbox {
+      background: #282b30;
+      animation: listHeight 3s;
+      height: 130px;
+      transform: rotate(90deg);
+    }
+    .MuiAutocomplete-listbox li {
+      color: #fff;
+      background: #282b30;
+      &:hover {
+        color: #eb7e7f;
+      }
+    }
+  }
+}
+
+@keyframes listHeight {
+  0% {
+    height: 0px;
+    opacity: 0;
+  }
+
+  100% {
+    height: 100px;
+    opacity: 1;
+  }
+}
