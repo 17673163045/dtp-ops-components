@@ -340,7 +340,8 @@ function PopperComponent(props: any) {
     !dropdownMatchSelectWidth && styles.dropdownNotMatchSelectWidth
   }`
     .replaceAll('undefined', '')
-    .replaceAll('null', '');
+    .replaceAll('null', '')
+    .replaceAll('false', '');
 
   const style = dropdownStyle ? { ...styleFp, ...dropdownStyle } : styleFp;
 
