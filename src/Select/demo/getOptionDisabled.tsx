@@ -7,22 +7,13 @@ const options = [
   { label: 'Tom', value: 'Tom' },
 ];
 
-export default function aaa() {
+export default function GetOptionDisabled() {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
       <Select
         options={options}
         style={{ width: 300, margin: '0 20px 20px 0' }}
-      />
-
-      <Select
-        options={options}
-        style={{ width: 300, margin: '0 20px 20px 0' }}
-      />
-
-      <Select
-        options={options}
-        style={{ width: 300, margin: '0 20px 20px 0' }}
+        getOptionDisabled={(option: any) => option.value === 'Jack'}
       />
     </div>
   );

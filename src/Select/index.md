@@ -12,118 +12,169 @@ title: Select
 
 ## 代码演示
 
-### test
-
-<code src='./demo/test.tsx'></code>
-
-### allowClear
+### 允许清除 allowClear
 
 <code src='./demo/allowClear.tsx'></code>
 
-### clearIcon
+### 自动搜索高亮 autoHighlight
 
-<code src='./demo/clearIcon.tsx'></code>
+<code src='./demo/autoHighlight.tsx'></code>
 
-### defaultActiveFirstOption
+### 默认第一个高亮 defaultActiveFirstOption
 
 <code src='./demo/defaultActiveFirstOption.tsx'></code>
 
-### defaultOpen
+### 默认打开 defaultOpen
 
 <code src='./demo/defaultOpen.tsx'></code>
 
-### defaultValue
+### 默认值 defaultValue
 
 <code src='./demo/defaultValue.tsx'></code>
 
-### disabled
+### 选中禁止关闭 disableCloseOnSelect
+
+<code src='./demo/disableCloseOnSelect.tsx'></code>
+
+### 禁用 disabled
 
 <code src='./demo/disabled.tsx'></code>
 
-### dropdownClassName
+### 下拉框类名 dropdownClassName
 
 <code src='./demo/dropdownClassName.tsx'></code>
 
-<!-- ### 基本
+### 下拉框样式 dropdownStyle
 
-<code desc='传入`options any[]`，当options每一项是`数字`或者`字符串`时,label和value都是`options item`本身<br /><br />`options`每一项是`对象`时,默认将`label`属性作为下拉的显示`文本`，`value`属性作为下拉选中的`值`<br /><br />当对象没有label属性或者value属性时,可以使用`labelMap`和`valueMap` 为下拉项指定label和value' src='./demo/basic.tsx'></code>
+<code src='./demo/dropdownStyle.tsx'></code>
 
-<code desc='基本使用' src='./demo/basic2.tsx'></code>
+### 下拉框同宽 dropdownMatchSelectWidth
 
-### size 和 label
+<code src='./demo/dropdownMatchSelectWidth.tsx'></code>
 
-<code desc='`size`可以是`small`，`default`，`medium`，默认是`medium`; 传入label来描述下拉框的作用' src='./demo/sizeAndLabel.tsx'></code>
+### 自定义下拉框 dropdownRender
 
-### 自定义 option 文本
+<code src='./demo/dropdownRender.tsx'></code>
 
-<code desc='`getOptionLabel`自定义`option`的`label文本`,第一个参数option是具有`label`(或`labelMap`)和`value`(或`valueMap`)属性键值对的对象; 第二个参数`state`是具有`selected`和`inputValue`属性的对象' src='./demo/customLabel.tsx'></code>
+### 过滤搜索函数 filterOption
 
-### 带搜索框,过滤 Option
+<code src='./demo/filterOption.tsx'></code>
 
-<code desc='`showSearch`设置为`true`对选项进行过滤搜索,`默认的过滤规则`是将输入的字符`转换小写`匹配Option的label文本,可以传入`filterOption`自定义过滤规则,也可以设置`filterOption`为`false`不过滤' src='./demo/showSearch.tsx'></code>
+### 禁用项 getOptionDisabled
 
-### 异步
+<code src='./demo/getOptionDisabled.tsx'></code>
 
-<code desc='搜索框输入异步获取数据' src='./demo/asyncSearch.tsx'></code> --> -->
+### 自定义 option 文本 getOptionLabel
+
+<code src='./demo/getOptionLabel.tsx'></code>
+
+### 分组 groupBy
+
+<code src='./demo/groupBy.tsx'></code>
+
+### 加载中 loading
+
+<code src='./demo/loading.tsx'></code>
+
+### 多选 multiple
+
+<code src='./demo/multiple.tsx'></code>
+
+### 控制下拉框显示 open
+
+<code src='./demo/open.tsx'></code>
+
+### 选项数组 options
+
+<code src='./demo/options.tsx'></code>
+
+### placeholder
+
+<code src='./demo/placeholder.tsx'></code>
+
+### 自定义清除按钮 removeIcon
+
+<code src='./demo/removeIcon.tsx'></code>
+
+### 自定义下拉按钮 showArrow
+
+<code src='./demo/showArrow.tsx'></code>
+
+### 输入框可输入 showSearch
+
+<code src='./demo/showSearch.tsx'></code>
+
+### 大小 size
+
+<code src='./demo/size.tsx'></code>
+
+### 输入框变体 variant
+
+<code src='./demo/variant.tsx'></code>
 
 ## API
 
 ### Select props
 
-| 参数                     | 说明                                                                                                                                                                        | 类型                                                                              | 默认值                                             | 版本             |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------- | ---------------- |
-| allowClear               | 支持清除                                                                                                                                                                    | boolean                                                                           | false                                              |                  |
-| autoClearSearchValue     | 是否在选中项后清空搜索框，只在 `mode` 为 `multiple` 或 `tags` 时有效                                                                                                        | boolean                                                                           | true                                               |                  |
-| autoFocus                | 默认获取焦点                                                                                                                                                                | boolean                                                                           | false                                              |                  |
-| bordered                 | 是否有边框                                                                                                                                                                  | boolean                                                                           | true                                               |                  |
-| clearIcon                | 自定义的多选框清空图标                                                                                                                                                      | ReactNode                                                                         | -                                                  |                  |
-| defaultActiveFirstOption | 是否默认高亮第一个选项                                                                                                                                                      | boolean                                                                           | true                                               |                  |
-| defaultOpen              | 是否默认展开下拉菜单                                                                                                                                                        | boolean                                                                           | -                                                  |                  |
-| defaultValue             | 指定默认选中的条目                                                                                                                                                          | string \| string\[]<br />number \| number\[]<br />LabeledValue \| LabeledValue\[] | -                                                  |                  |
-| disabled                 | 是否禁用                                                                                                                                                                    | boolean                                                                           | false                                              |                  |
-| dropdownClassName        | 下拉菜单的 className 属性                                                                                                                                                   | string                                                                            | -                                                  |                  |
-| dropdownMatchSelectWidth | 下拉菜单和选择器同宽。默认将设置 `min-width`，当值小于选择框宽度时会被忽略。false 时会关闭虚拟滚动                                                                          | boolean \| number                                                                 | true                                               |                  |
-| dropdownRender           | 自定义下拉框内容                                                                                                                                                            | (originNode: ReactNode) => ReactNode                                              | -                                                  |                  |
-| dropdownStyle            | 下拉菜单的 style 属性                                                                                                                                                       | CSSProperties                                                                     | -                                                  |                  |
-| fieldNames               | 自定义节点 label、key、options 的字段                                                                                                                                       | object                                                                            | { label: `label`, key: `key`, options: `options` } | 4.17.0           |
-| filterOption             | 是否根据输入项进行筛选。当其为一个函数时，会接收 `inputValue` `option` 两个参数，当 `option` 符合筛选条件时，应返回 true，反之则返回 false                                  | boolean \| function(inputValue, option)                                           | true                                               |                  |
-| filterSort               | 搜索时对筛选结果项的排序函数, 类似[Array.sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)里的 compareFunction             | (optionA: Option, optionB: Option) => number                                      | -                                                  | 4.9.0            |
-| getPopupContainer        | 菜单渲染父节点。默认渲染到 body 上，如果你遇到菜单滚动定位问题，试试修改为滚动的区域，并相对其定位。[示例](https://codesandbox.io/s/4j168r7jw0)                             | function(triggerNode)                                                             | () => document.body                                |                  |
-| labelInValue             | 是否把每个选项的 label 包装到 value 中，会把 Select 的 value 类型从 `string` 变为 { value: string, label: ReactNode } 的格式                                                | boolean                                                                           | false                                              |                  |
-| listHeight               | 设置弹窗滚动高度                                                                                                                                                            | number                                                                            | 256                                                |                  |
-| loading                  | 加载中状态                                                                                                                                                                  | boolean                                                                           | false                                              |                  |
-| maxTagCount              | 最多显示多少个 tag，响应式模式会对性能产生损耗                                                                                                                              | number \| `responsive`                                                            | -                                                  | responsive: 4.10 |
-| maxTagPlaceholder        | 隐藏 tag 时显示的内容                                                                                                                                                       | ReactNode \| function(omittedValues)                                              | -                                                  |                  |
-| maxTagTextLength         | 最大显示的 tag 文本长度                                                                                                                                                     | number                                                                            | -                                                  |                  |
-| menuItemSelectedIcon     | 自定义多选时当前选中的条目图标                                                                                                                                              | ReactNode                                                                         | -                                                  |                  |
-| mode                     | 设置 Select 的模式为多选或标签                                                                                                                                              | `multiple` \| `tags`                                                              | -                                                  |                  |
-| notFoundContent          | 当下拉列表为空时显示的内容                                                                                                                                                  | ReactNode                                                                         | `Not Found`                                        |                  |
-| open                     | 是否展开下拉菜单                                                                                                                                                            | boolean                                                                           | -                                                  |                  |
-| optionFilterProp         | 搜索时过滤对应的 `option` 属性，如设置为 `children` 表示对内嵌内容进行搜索。若通过 `options` 属性配置选项内容，建议设置 `optionFilterProp="label"` 来对内容进行搜索。       | string                                                                            | `value`                                            |                  |
-| optionLabelProp          | 回填到选择框的 Option 的属性值，默认是 Option 的子元素。比如在子元素需要高亮效果时，此值可以设为 `value`。[示例](https://codesandbox.io/s/antd-reproduction-template-tk678) | string                                                                            | `children`                                         |                  |
-| options                  | 数据化配置选项内容，相比 jsx 定义会获得更好的渲染性能                                                                                                                       | { label, value }\[]                                                               | -                                                  |                  |
-| placeholder              | 选择框默认文本                                                                                                                                                              | string                                                                            | -                                                  |                  |
-| removeIcon               | 自定义的多选框清除图标                                                                                                                                                      | ReactNode                                                                         | -                                                  |                  |
-| searchValue              | 控制搜索文本                                                                                                                                                                | string                                                                            | -                                                  |                  |
-| showArrow                | 是否显示下拉小箭头                                                                                                                                                          | boolean                                                                           | 单选为 true，多选为 false                          |                  |
-| showSearch               | 使单选模式可搜索                                                                                                                                                            | boolean                                                                           | false                                              |                  |
-| size                     | 选择框大小                                                                                                                                                                  | `large` \| `middle` \| `small`                                                    | `middle`                                           |                  |
-| suffixIcon               | 自定义的选择框后缀图标                                                                                                                                                      | ReactNode                                                                         | -                                                  |                  |
-| tagRender                | 自定义 tag 内容 render，仅在 `mode` 为 `multiple` 或 `tags` 时生效                                                                                                          | (props) => ReactNode                                                              | -                                                  |                  |
-| tokenSeparators          | 在 `tags` 和 `multiple` 模式下自动分词的分隔符                                                                                                                              | string\[]                                                                         | -                                                  |                  |
-| value                    | 指定当前选中的条目，多选时为一个数组。（value 数组引用未变化时，Select 不会更新）                                                                                           | string \| string\[]<br />number \| number\[]<br />LabeledValue \| LabeledValue\[] | -                                                  |                  |
-| virtual                  | 设置 false 时关闭虚拟滚动                                                                                                                                                   | boolean                                                                           | true                                               | 4.1.0            |
-| onBlur                   | 失去焦点时回调                                                                                                                                                              | function                                                                          | -                                                  |                  |
-| onChange                 | 选中 option，或 input 的 value 变化时，调用此函数                                                                                                                           | function(value, option:Option \| Array&lt;Option>)                                | -                                                  |                  |
-| onClear                  | 清除内容时回调                                                                                                                                                              | function                                                                          | -                                                  | 4.6.0            |
-| onDeselect               | 取消选中时调用，参数为选中项的 value (或 key) 值，仅在 `multiple` 或 `tags` 模式下生效                                                                                      | function(string \| number \| LabeledValue)                                        | -                                                  |                  |
-| onDropdownVisibleChange  | 展开下拉菜单的回调                                                                                                                                                          | function(open)                                                                    | -                                                  |                  |
-| onFocus                  | 获得焦点时回调                                                                                                                                                              | function                                                                          | -                                                  |                  |
-| onInputKeyDown           | 按键按下时回调                                                                                                                                                              | function                                                                          | -                                                  |                  |
-| onMouseEnter             | 鼠标移入时回调                                                                                                                                                              | function                                                                          | -                                                  |                  |
-| onMouseLeave             | 鼠标移出时回调                                                                                                                                                              | function                                                                          | -                                                  |                  |
-| onPopupScroll            | 下拉列表滚动时的回调                                                                                                                                                        | function                                                                          | -                                                  |                  |
-| onSearch                 | 文本框值变化时回调                                                                                                                                                          | function(value: string)                                                           | -                                                  |                  |
-| onSelect                 | 被选中时调用，参数为选中项的 value (或 key) 值                                                                                                                              | function(string \| number \| LabeledValue, option: Option)                        | -                                                  |                  |
+| 参数                     | 说明                                                                                                                                                       | 类型                                                                                                           | 默认值                                      | 版本 |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ---- |
+| allowClear               | 支持清除                                                                                                                                                   | boolean                                                                                                        | false                                       |      |
+| autoHighlight            | 搜索模式匹配高亮字符                                                                                                                                       | boolean                                                                                                        | false                                       |      |
+| className                | 给最外层容器添加类名                                                                                                                                       | string                                                                                                         |                                             |      |
+| defaultActiveFirstOption | 是否默认高亮第一个选项                                                                                                                                     | boolean                                                                                                        | true                                        |      |
+| defaultOpen              | 是否默认展开下拉菜单                                                                                                                                       | boolean                                                                                                        | -                                           |      |
+| defaultValue             | 指定默认选中的条目                                                                                                                                         | string \| string\[]<br />number \| number\[]<br />LabeledValue \| LabeledValue\[]                              | -                                           |      |
+| disabled                 | 是否禁用                                                                                                                                                   | boolean                                                                                                        | false                                       |      |
+| disableCloseOnSelect     | 是否在选中之后关闭下拉框                                                                                                                                   | boolean                                                                                                        | multiple=true 时为 false,其余默认为 true    |      |
+| dropdownClassName        | 下拉菜单的 className 属性                                                                                                                                  | string                                                                                                         | -                                           |      |
+| dropdownMatchSelectWidth | 下拉菜单和选择器同宽。默认将设置 `min-width`，当值小于选择框宽度时会被忽略。false 时会关闭虚拟滚动                                                         | boolean \| number                                                                                              | true                                        |      |
+| dropdownRender           | 自定义下拉框内容                                                                                                                                           | (originNode: ReactNode) => ReactNode                                                                           | -                                           |      |
+| dropdownStyle            | 下拉菜单的 style 属性                                                                                                                                      | CSSProperties                                                                                                  | -                                           |      |
+| filterOption             | 是否根据输入项进行筛选。当其为一个函数时，会接收 `inputValue` `option` 两个参数，当 `option` 符合筛选条件时，应返回 true，反之则返回 false                 | boolean \| function(inputValue, option)                                                                        | true                                        |      |
+| getOptionDisabled        | 通过函数设置禁用的每一项                                                                                                                                   | (option) _=>_ _boolean_;                                                                                       |                                             |      |
+| getOptionLabel           | 自定义选项的内容显示,不传的话默认显示 option[labelMap]                                                                                                     | (option,state:{selected:boolean,inputValue:string,highlightParts:any[]})=>React.ReactNode \| null \| undefined |                                             |      |
+| groupBy                  | 对 option 分组,分组前确保选项按照它们分组的相同维度进行排序， 否则会看到重复的标题                                                                         | (option) _=>_ string;                                                                                          |                                             |      |
+| highlightStyle           | 为高亮字母的容器设置样式                                                                                                                                   | React.CssProperty                                                                                              | {color:'red',fontWeight:700}                |      |
+| highlightOptions         | 匹配高亮的规则配置`insideWords`如果为 false 只匹配首字母,否则匹配单词内的字母,`findAllOccurrences`如果为 false 匹配到第一个单词即停止匹配,否则匹配所有单词 | {insideWords:boolean,findAllOccurrences:boolean}                                                               | {insideWords:true,findAllOccurrences:false} |      |
+| label                    | 设置 input 的内联 label 文本                                                                                                                               | string                                                                                                         |                                             |      |
+| labelInValue             | 是否把每个选项的 labelMap 包装到 value 中，会把 Select 的 value 类型从 `string` 变为 { [valueMap]: string, [labelMap]: string } 的格式                     | boolean                                                                                                        | false                                       |      |
+| labelMap                 | 取 option 上的一个属性作为每一项的显示文本,如果 option 是对象默认取 label 属性,不是对象 option 本身会被当作文本显示                                        | string                                                                                                         | 'label'                                     |      |
+| loading                  | 加载中状态                                                                                                                                                 | boolean                                                                                                        | false                                       |      |
+| loadingText              | loading 状态时下拉框显示的内容                                                                                                                             | ReactNode                                                                                                      | 'loading...'                                |      |
+| maxTagCount              | 最多显示多少个 tag，响应式模式会对性能产生损耗                                                                                                             | number \| `responsive`                                                                                         | -                                           |      |
+| maxTagPlaceholder        | 隐藏 tag 时显示的内容                                                                                                                                      | ReactNode \| function(omittedValues)                                                                           | -                                           |      |
+| maxTagTextLength         | 最大显示的 tag 文本长度                                                                                                                                    | number                                                                                                         | -                                           |      |
+| menuItemSelectedIcon     | 自定义多选时当前选中的条目图标                                                                                                                             | ReactNode                                                                                                      | -                                           |      |
+| multiple                 | 设置 Select 的模式为多选                                                                                                                                   | boolean                                                                                                        | false                                       |      |
+| notFoundContent          | 当下拉列表为空时显示的内容                                                                                                                                 | ReactNode                                                                                                      | `no options`                                |      |
+| open                     | 是否展开下拉菜单                                                                                                                                           | boolean                                                                                                        | -                                           |      |
+| options                  | 数据化配置选项内容                                                                                                                                         | { [labelMap]:any, [valueMap]:any}\[] \| string[] \| number[]                                                   | -                                           |      |
+| placeholder              | 选择框默认文本                                                                                                                                             | string                                                                                                         | -                                           |      |
+| removeIcon               | 自定义的多选框清除图标                                                                                                                                     | ReactNode                                                                                                      | -                                           |      |
+| renderOption             | 完全自定义每一项 Option                                                                                                                                    | (option,itemProps,state,highlightParts)=>ReactNode                                                             | -                                           |      |
+| searchValue              | 控制搜索文本                                                                                                                                               | string                                                                                                         | -                                           |      |
+| showArrow                | 是否显示下拉小箭头或者自定义下拉箭头                                                                                                                       | boolean \| ReactNode                                                                                           | -                                           |      |
+| showSearch               | 使输入框可输入搜索                                                                                                                                         | boolean                                                                                                        | false                                       |      |
+| size                     | 选择框大小                                                                                                                                                 | `middle` \| `small`                                                                                            | `small`                                     |      |
+| style                    | 給最外层容器设置样式                                                                                                                                       | React.CSSProperties                                                                                            |                                             |      |
+| tagRender                | 自定义 tag 内容 render，仅在 `mode` 为 `multiple` 或 `tags` 时生效                                                                                         | (props) => ReactNode                                                                                           | -                                           |      |
+| tokenSeparators          | 在 `tags` 和 `multiple` 模式下自动分词的分隔符                                                                                                             | string\[]                                                                                                      | -                                           |      |
+| value                    | 指定当前选中的条目，多选时为一个数组。（value 数组引用未变化时，Select 不会更新）                                                                          | string \| string\[]<br />number \| number\[]<br />LabeledValue \| LabeledValue\[]                              | -                                           |      |
+| valueMap                 | 取 option 上的一个属性作为选中的值,如果 option 是对象默认取 value 属性,不是对象 option 本身为选中的值                                                      | string                                                                                                         | 'value'                                     |      |
+| variant                  | input 输入框的三种变体                                                                                                                                     | 'outlined' \| 'filled' \| 'standard'                                                                           |                                             |      |
+| virtual                  | 设置 false 时关闭虚拟滚动                                                                                                                                  | boolean                                                                                                        | true                                        |      |
+| onBlur                   | 失去焦点时回调                                                                                                                                             | function                                                                                                       | -                                           |      |
+| onChange                 | 选中 option，或 input 的 value 变化时，调用此函数                                                                                                          | function(value, option:Option \| Array&lt;Option>)                                                             | -                                           |      |
+| onClear                  | 清除内容时回调                                                                                                                                             | function                                                                                                       | -                                           |      |
+| onDeselect               | 取消选中时调用，参数为选中项的 value (或 key) 值，仅在 `multiple` 或 `tags` 模式下生效                                                                     | function(string \| number \| LabeledValue)                                                                     | -                                           |      |
+| onOpenChange             | 展开下拉菜单的回调                                                                                                                                         | function(open,reason)                                                                                          |                                             |      |
+| onDropdownVisibleChange  | 展开下拉菜单的回调                                                                                                                                         | function(open,reason)                                                                                          | -                                           |      |
+| onFocus                  | 获得焦点时回调                                                                                                                                             | function                                                                                                       | -                                           |      |
+| onInputKeyDown           | 按键按下时回调                                                                                                                                             | function                                                                                                       | -                                           |      |
+| onMouseEnter             | 鼠标移入时回调                                                                                                                                             | function                                                                                                       | -                                           |      |
+| onMouseLeave             | 鼠标移出时回调                                                                                                                                             | function                                                                                                       | -                                           |      |
+| onPopupScroll            | 下拉列表滚动时的回调                                                                                                                                       | function                                                                                                       | -                                           |      |
+| onSearch                 | 文本框值变化时回调                                                                                                                                         | function(value: string)                                                                                        | -                                           |      |
+| onSelect                 | 被选中时调用，参数为选中项的 value (或 key) 值                                                                                                             | function(string \| number \| LabeledValue, option: Option)                                                     | -                                           |      |
 
-> 注意，如果发现下拉菜单跟随页面滚动，或者需要在其他弹层中触发 Select，请尝试使用 `getPopupContainer={triggerNode => triggerNode.parentElement}` 将下拉弹层渲染节点固定在触发器的父元素中。
+>

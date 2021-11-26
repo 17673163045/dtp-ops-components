@@ -1,48 +1,39 @@
 import React from 'react';
 import { Select } from 'dtp-ops-components';
 
-const options1 = [1, '1'];
-
-const options2 = [
+const options = [
   { label: 'Jack', value: 'Jack' },
   { label: 'Lucy', value: 'Lucy' },
   { label: 'Tom', value: 'Tom' },
 ];
 
-const options3 = [
-  { name: 'Tom', id: 11 },
-  { name: 'Jack', id: 12 },
-  { name: 'Lucy', id: 14 },
-];
-
-function DefaultValue() {
+export default function DisableCloseOnSelect() {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
       <Select
-        defaultValue={1}
-        size="small"
+        disableCloseOnSelect
+        options={options}
         style={{ width: 300, margin: '0 20px 20px 0' }}
-        options={options1}
       />
 
       <Select
-        defaultValue="Jack"
-        size="small"
+        disableCloseOnSelect={false}
+        options={options}
         style={{ width: 300, margin: '0 20px 20px 0' }}
-        options={options2}
       />
 
       <Select
         multiple
-        labelMap="name"
-        valueMap="id"
-        defaultValue={[12, 14]}
-        size="small"
+        options={options}
         style={{ width: 300, margin: '0 20px 20px 0' }}
-        options={options3}
+      />
+
+      <Select
+        disableCloseOnSelect={false}
+        multiple
+        options={options}
+        style={{ width: 300, margin: '0 20px 20px 0' }}
       />
     </div>
   );
 }
-
-export default DefaultValue;

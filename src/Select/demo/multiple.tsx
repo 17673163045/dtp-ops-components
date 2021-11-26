@@ -7,23 +7,25 @@ const options = [
   { label: 'Tom', value: 'Tom' },
 ];
 
-export default function aaa() {
+function Multiple() {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
       <Select
-        options={options}
         style={{ width: 300, margin: '0 20px 20px 0' }}
+        size="small"
+        options={options}
+        label="single"
       />
 
       <Select
-        options={options}
+        multiple
         style={{ width: 300, margin: '0 20px 20px 0' }}
-      />
-
-      <Select
+        size="small"
         options={options}
-        style={{ width: 300, margin: '0 20px 20px 0' }}
+        label="multiple"
       />
     </div>
   );
 }
+
+export default Multiple;

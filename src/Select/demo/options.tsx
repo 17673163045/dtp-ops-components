@@ -1,15 +1,15 @@
 import React from 'react';
-import Select from '../Select';
+import { Select } from 'dtp-ops-components';
 
 function SelectOptionsWithNumberOrString() {
-  const options = [1, 'b', 3, 'd'];
+  const options = [1, '1', 2, '2'];
 
   return (
     <Select
       allowClear
       label="options is number or string"
       size="small"
-      style={{ width: 300, margin: 20 }}
+      style={{ width: 300, margin: '0 20px 20px 0' }}
       options={options}
     />
   );
@@ -24,9 +24,9 @@ function SelectOptionsWithLabelValue() {
 
   return (
     <Select
-      label="options is object"
+      label="options is label value object"
       size="small"
-      style={{ width: 300, margin: 20 }}
+      style={{ width: 300, margin: '0 20px 20px 0' }}
       options={options}
     />
   );
@@ -42,7 +42,7 @@ function SelectOptionsCustomPropName() {
     <Select
       size="small"
       label="options use propNameMap"
-      style={{ width: 300, margin: 20 }}
+      style={{ width: 300, margin: '0 20px 20px 0' }}
       options={options}
       labelMap="name"
       valueMap="age"
@@ -50,7 +50,7 @@ function SelectOptionsCustomPropName() {
   );
 }
 
-function Basic() {
+function Options() {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
       <SelectOptionsWithNumberOrString />
@@ -60,4 +60,4 @@ function Basic() {
   );
 }
 
-export default Basic;
+export default Options;

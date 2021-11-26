@@ -1,6 +1,6 @@
 import React from 'react';
-import Select from '../Select';
-import { TextField, Button } from '@mui/material';
+import { Select } from 'dtp-ops-components';
+import { Button } from '@mui/material';
 
 const options = [
   { label: 'Jack', value: 'Jack' },
@@ -8,9 +8,8 @@ const options = [
   { label: 'Tom', value: 'Tom' },
 ];
 
-function SizeAndLabel() {
-  const [size, setSize] = React.useState<any>('default');
-  const [label, setLabel] = React.useState<any>();
+function Size() {
+  const [size, setSize] = React.useState<any>('small');
 
   return (
     <div style={{ display: 'inline-block', width: '50%' }}>
@@ -25,28 +24,20 @@ function SizeAndLabel() {
         <Button
           style={{ marginRight: 20 }}
           variant="contained"
-          onClick={() => setSize('default')}
+          onClick={() => setSize('middle')}
         >
-          default
+          middle
         </Button>
-
-        <TextField
-          style={{ width: 160, marginRight: 20 }}
-          placeholder="input Select label"
-          size="small"
-          onChange={(e) => setLabel(e.target.value)}
-        />
       </div>
-      <div></div>
       <Select
-        style={{ width: 383 }}
         allowClear
-        label={label}
+        label={size}
         size={size}
         options={options}
+        style={{ width: 300 }}
       />
     </div>
   );
 }
 
-export default SizeAndLabel;
+export default Size;

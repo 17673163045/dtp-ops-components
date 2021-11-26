@@ -7,13 +7,13 @@ const options = [
   { label: 'Tom', value: 'Tom' },
 ];
 
-function ClearIcon() {
+function RemoveIcon() {
   return (
     <div>
       <Select
         allowClear
         defaultValue="Jack"
-        clearIcon={
+        removeIcon={
           <span
             style={{
               color: 'red',
@@ -35,4 +35,4 @@ function ClearIcon() {
   );
 }
 
-export default ClearIcon;
+export default RemoveIcon;

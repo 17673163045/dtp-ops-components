@@ -36,10 +36,12 @@
     "@mui/material": "^5.0.4",
     "@mui/styles": "^5.0.1",
     "@mui/x-data-grid": "^5.0.0-beta.4",
+    "autosuggest-highlight": "^3.2.0",
     "lodash": "^4.17.21",
     "react": "^16.12.0 || ^17.0.0"
   },
   "devDependencies": {
+    "@types/autosuggest-highlight": "^3.2.0",
     "@umijs/test": "^3.0.5",
     "dumi": "^1.1.31",
     "father-build": "^1.17.2",

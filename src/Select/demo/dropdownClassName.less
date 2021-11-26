@@ -1,0 +1,41 @@
+.dropdown {
+  :global {
+    .MuiAutocomplete-paper {
+      border-radius: 0;
+    }
+    ul.MuiAutocomplete-listbox {
+      background: #282b30;
+      height: 120px;
+    }
+    .MuiAutocomplete-listbox {
+      overflow-x: hidden;
+    }
+    .MuiAutocomplete-listbox
+      .MuiAutocomplete-option[aria-selected='true'].Mui-focused {
+      background-color: #4cd1b9;
+    }
+    .MuiAutocomplete-listbox .MuiAutocomplete-option[aria-selected='true'] {
+      background-color: #4cd1b9;
+      transform: scale(1.1);
+      font-size: 16px;
+      color: #fff;
+      padding-left: 20px;
+    }
+    .MuiAutocomplete-listbox li {
+      height: 40px;
+      background: #282b30;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 12px;
+      color: #fff;
+      &:hover {
+        color: #eb7e7f;
+        background-color: rgba(0, 0, 0, 0.21);
+        transform: scale(1.1);
+        font-size: 16px;
+        padding-left: 20px;
+        transition: transform 0.3s;
+      }
+    }
+  }
+}
