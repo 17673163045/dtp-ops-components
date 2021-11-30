@@ -8,17 +8,20 @@ type OptionValue = string | number;
 export interface SelectProps {
   allowClear?: boolean;
   autoHighlight?: boolean;
+  clearIcon?: any;
   className?: string;
   defaultActiveFirstOption?: boolean;
   defaultOpen?: boolean;
   defaultValue?: string | number | string[] | number[] | [];
-  disableCloseOnSelect?: boolean;
   disabled?: boolean;
+  disableCloseOnSelect?: boolean;
+  disablePortal?: boolean;
   dropdownClassName?: string;
   dropdownMatchSelectWidth?: boolean;
   dropdownStyle?: React.CSSProperties;
   dropdownRender?: (originNode: any) => any;
   filterOption?: false | ((inputValue: string, option: Option) => boolean);
+  fullWidth?: boolean;
   getOptionDisabled?: (option: Option) => boolean;
   getOptionLabel?: (
     option: Option,
@@ -30,7 +33,9 @@ export interface SelectProps {
   highlightStyle?: React.CSSProperties;
   label?: any;
   labelMap?: string;
+  listHeight?: number | string;
   loading?: boolean;
+  loadingIndicator?: string | React.ReactNode;
   loadingText?: any;
   multiple?: boolean;
   notFoundContent?: any;
@@ -83,6 +88,8 @@ function Select(props: SelectProps) {
   const {
     allowClear = false,
     autoHighlight = false,
+    className,
+    clearIcon: clearIconFp,
     defaultActiveFirstOption = true,
     defaultOpen,
     disableCloseOnSelect: disableCloseOnSelectFp,
@@ -91,6 +98,7 @@ function Select(props: SelectProps) {
     dropdownStyle,
     dropdownRender,
     filterOption,
+    fullWidth = true,
     getOptionDisabled: getOptionDisabledFp,
     getOptionLabel: getOptionLabelFp,
     groupBy: groupByFp,
@@ -98,8 +106,9 @@ function Select(props: SelectProps) {
     highlightStyle,
     label,
     labelMap = 'label',
+    listHeight,
     loading,
-    loadingText: loadingTextFp,
+    loadingIndicator,
     multiple,
     notFoundContent,
     onChange: onChangeFp,
@@ -109,7 +118,7 @@ function Select(props: SelectProps) {
     options: optionsFp,
     onSearch,
     placeholder,
-    removeIcon: clearIconFp,
+    removeIcon,
     showArrow = true,
     renderOption: renderOptionFp,
     searchValue,
@@ -175,11 +184,7 @@ function Select(props: SelectProps) {
     return !!multiple;
   }, [disableCloseOnSelectFp]);
 
-  const clearIcon = React.useMemo(() => {
-    if (!allowClear) return null;
-    if (clearIconFp) return clearIconFp;
-    return undefined;
-  }, [allowClear, clearIconFp]);
+  const clearIcon = !allowClear ? null : clearIconFp || removeIcon;
 
   const popupIcon = React.useMemo(() => {
     if (typeof showArrow === 'boolean') return showArrow ? undefined : null;
@@ -191,11 +196,6 @@ function Select(props: SelectProps) {
     const _size = sizeFp === 'middle' ? 'medium' : sizeFp;
     return _size;
   }, [sizeFp]);
-
-  const loadingText = React.useMemo(() => {
-    if (loadingTextFp !== undefined) return loadingTextFp;
-    return 'Loading...';
-  }, [loadingTextFp]);
 
   function onClose(e: any, reason: string) {
     onOpenChange(false, reason, e);
@@ -336,6 +336,10 @@ function Select(props: SelectProps) {
     return '';
   }
 
+  const wrapClassnames = `${className} ${!allowClear && styles.notAllowClear}`
+    .replaceAll('undefined', '')
+    .replaceAll('false', '');
+
   const dropdownContextProps = {
     dropdownClassName,
     dropdownMatchSelectWidth,
@@ -343,16 +347,22 @@ function Select(props: SelectProps) {
     dropdownRender,
   };
 
+  const popupContextProps = {
+    listHeight,
+  };
+
   const contextProvideValue = {
     open,
     onOpenChange,
     ...dropdownContextProps,
+    ...popupContextProps,
   };
 
   return (
     <SelectComponentContext.Provider value={contextProvideValue}>
       <Autocomplete
         autoHighlight={!!defaultActiveFirstOption}
+        className={wrapClassnames}
         clearIcon={clearIcon}
         disableCloseOnSelect={disableCloseOnSelect}
         filterOptions={filterOptions}
@@ -361,7 +371,6 @@ function Select(props: SelectProps) {
         groupBy={groupByFp && groupBy}
         inputValue={searchValue}
         loading={loading}
-        loadingText={loadingText}
         multiple={multiple}
         noOptionsText={notFoundContent}
         onChange={onChange}
@@ -381,15 +390,15 @@ function Select(props: SelectProps) {
           }
 
           const override_InputProps: any = {};
-          override_InputProps.endAdornment = loading ? (
-            <CircularProgress
-              color="primary"
-              size={20}
-              style={{ position: 'absolute', right: 6 }}
-            />
-          ) : (
-            params.InputProps.endAdornment
-          );
+          override_InputProps.endAdornment = loading
+            ? loadingIndicator || (
+                <CircularProgress
+                  color="primary"
+                  size={20}
+                  style={{ position: 'absolute', right: 6 }}
+                />
+              )
+            : params.InputProps.endAdornment;
           return (
             <TextField
               placeholder={placeholder}
@@ -404,6 +413,7 @@ function Select(props: SelectProps) {
                 ...params.inputProps,
                 ...override_inputProps,
               }}
+              fullWidth={fullWidth}
             />
           );
         }}
@@ -421,7 +431,7 @@ function PaperComponent(props: any) {
 }
 
 function PopperComponent(props: any) {
-  const { children, ...restProps } = props;
+  const { className, children, ...restProps } = props;
 
   const {
     dropdownClassName,
@@ -430,7 +440,7 @@ function PopperComponent(props: any) {
     dropdownRender,
   } = React.useContext(SelectComponentContext) || {};
 
-  const classes = `${dropdownClassName} ${styles.dropdownWrap} ${
+  const classes = `${className} ${dropdownClassName} ${styles.dropdownWrap} ${
     !dropdownMatchSelectWidth && styles.dropdownNotMatchSelectWidth
   }`
     .replaceAll('undefined', '')

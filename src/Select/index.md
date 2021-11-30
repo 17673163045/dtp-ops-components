@@ -32,13 +32,17 @@ title: Select
 
 <code src='./demo/defaultValue.tsx'></code>
 
+### 禁用 disabled
+
+<code src='./demo/disabled.tsx'></code>
+
 ### 选中禁止关闭 disableCloseOnSelect
 
 <code src='./demo/disableCloseOnSelect.tsx'></code>
 
-### 禁用 disabled
+### 下拉框渲染在父元素下 disablePortal
 
-<code src='./demo/disabled.tsx'></code>
+<code src='./demo/disablePortal.tsx'></code>
 
 ### 下拉框类名 dropdownClassName
 
@@ -126,6 +130,7 @@ title: Select
 | defaultValue             | 指定默认选中的条目                                                                                                                                         | string \| string\[]<br />number \| number\[]<br />LabeledValue \| LabeledValue\[]                              | -                                           |      |
 | disabled                 | 是否禁用                                                                                                                                                   | boolean                                                                                                        | false                                       |      |
 | disableCloseOnSelect     | 是否在选中之后关闭下拉框                                                                                                                                   | boolean                                                                                                        | multiple=true 时为 false,其余默认为 true    |      |
+| disablePortal            | 下拉框弹窗默认渲染在 body 下面,设置为 true 下拉框将渲染在父元素下                                                                                          | boolean                                                                                                        | false                                       |      |
 | dropdownClassName        | 下拉菜单的 className 属性                                                                                                                                  | string                                                                                                         | -                                           |      |
 | dropdownMatchSelectWidth | 下拉菜单和选择器同宽。默认将设置 `min-width`，当值小于选择框宽度时会被忽略。false 时会关闭虚拟滚动                                                         | boolean \| number                                                                                              | true                                        |      |
 | dropdownRender           | 自定义下拉框内容                                                                                                                                           | (originNode: ReactNode) => ReactNode                                                                           | -                                           |      |
@@ -140,6 +145,7 @@ title: Select
 | labelInValue             | 是否把每个选项的 labelMap 包装到 value 中，会把 Select 的 value 类型从 `string` 变为 { [valueMap]: string, [labelMap]: string } 的格式                     | boolean                                                                                                        | false                                       |      |
 | labelMap                 | 取 option 上的一个属性作为每一项的显示文本,如果 option 是对象默认取 label 属性,不是对象 option 本身会被当作文本显示                                        | string                                                                                                         | 'label'                                     |      |
 | loading                  | 加载中状态                                                                                                                                                 | boolean                                                                                                        | false                                       |      |
+| loadingIndicator         | 自定义 input 后缀加载指示器                                                                                                                                | string \| ReactNode                                                                                            | -                                           |      |
 | loadingText              | loading 状态时下拉框显示的内容                                                                                                                             | ReactNode                                                                                                      | 'loading...'                                |      |
 | maxTagCount              | 最多显示多少个 tag，响应式模式会对性能产生损耗                                                                                                             | number \| `responsive`                                                                                         | -                                           |      |
 | maxTagPlaceholder        | 隐藏 tag 时显示的内容                                                                                                                                      | ReactNode \| function(omittedValues)                                                                           | -                                           |      |

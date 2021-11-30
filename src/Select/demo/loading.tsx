@@ -49,7 +49,10 @@ function Loading() {
       <LoadingButton
         style={{ margin: '0 20px 20px 0' }}
         variant="contained"
-        onClick={() => setOptions([])}
+        onClick={() => {
+          setOptions([]);
+          setLoading(false);
+        }}
       >
         Clear
       </LoadingButton>
@@ -78,6 +81,15 @@ function Loading() {
           allowClear
           label="notFoundContent loading"
           size="small"
+          style={{ width: 300, marginRight: 20 }}
+          options={options}
+        />
+
+        <Select
+          size="small"
+          loading={loading}
+          loadingIndicator={'loading...'}
+          label="custom loadingIndicator"
           style={{ width: 300, marginRight: 20 }}
           options={options}
         />
