@@ -116,6 +116,10 @@ title: Select
 
 <code src='./demo/variant.tsx'></code>
 
+### 下拉框滚动事件 onPopupScrollBottom
+
+<code src='./demo/onPopupScrollBottom.tsx'></code>
+
 ## API
 
 ### Select props

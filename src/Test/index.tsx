@@ -1,83 +1,33 @@
+import { ConstructionOutlined } from '@mui/icons-material';
 import React from 'react';
 import Select from '../Select';
 
-const options = [
-  { label: 'JackJackJackJackJackJackJackJackJack', value: 'Jack' },
-  { label: 'JackJackJackJackJackJackJackJackJackJackJack', value: 'Lucy' },
-  {
-    label: 'JackJackJackJackJackJackJackJackJackJackJackJackJack',
-    value: 'Tom',
-  },
-  { label: 'JackJackJackJackJackJackJackJackJack', value: 'Jack' },
-  { label: 'JackJackJackJackJackJackJackJackJackJackJack', value: 'Lucy' },
-  {
-    label: 'JackJackJackJackJackJackJackJackJackJackJackJackJack',
-    value: 'Tom',
-  },
-  { label: 'JackJackJackJackJackJackJackJackJack', value: 'Jack' },
-  { label: 'JackJackJackJackJackJackJackJackJackJackJack', value: 'Lucy' },
-  {
-    label: 'JackJackJackJackJackJackJackJackJackJackJackJackJack',
-    value: 'Tom',
-  },
-  { label: 'JackJackJackJackJackJackJackJackJack', value: 'Jack' },
-  { label: 'JackJackJackJackJackJackJackJackJackJackJack', value: 'Lucy' },
-  {
-    label: 'JackJackJackJackJackJackJackJackJackJackJackJackJack',
-    value: 'Tom',
-  },
-  { label: 'JackJackJackJackJackJackJackJackJack', value: 'Jack' },
-  { label: 'JackJackJackJackJackJackJackJackJackJackJack', value: 'Lucy' },
-  {
-    label: 'JackJackJackJackJackJackJackJackJackJackJackJackJack',
-    value: 'Tom',
-  },
-  { label: 'JackJackJackJackJackJackJackJackJack', value: 'Jack' },
-  { label: 'JackJackJackJackJackJackJackJackJackJackJack', value: 'Lucy' },
-  {
-    label: 'JackJackJackJackJackJackJackJackJackJackJackJackJack',
-    value: 'Tom',
-  },
-  { label: 'JackJackJackJackJackJackJackJackJack', value: 'Jack' },
-  { label: 'JackJackJackJackJackJackJackJackJackJackJack', value: 'Lucy' },
-  {
-    label: 'JackJackJackJackJackJackJackJackJackJackJackJackJack',
-    value: 'Tom',
-  },
-  { label: 'JackJackJackJackJackJackJackJackJack', value: 'Jack' },
-  { label: 'JackJackJackJackJackJackJackJackJackJackJack', value: 'Lucy' },
-  {
-    label: 'JackJackJackJackJackJackJackJackJackJackJackJackJack',
-    value: 'Tom',
-  },
-  { label: 'JackJackJackJackJackJackJackJackJack', value: 'Jack' },
-  { label: 'JackJackJackJackJackJackJackJackJackJackJack', value: 'Lucy' },
-  {
-    label: 'JackJackJackJackJackJackJackJackJackJackJackJackJack',
-    value: 'Tom',
-  },
-  { label: 'JackJackJackJackJackJackJackJackJack', value: 'Jack' },
-  { label: 'JackJackJackJackJackJackJackJackJackJackJack', value: 'Lucy' },
-  {
-    label: 'JackJackJackJackJackJackJackJackJackJackJackJackJack',
-    value: 'Tom',
-  },
-  { label: 'JackJackJackJackJackJackJackJackJack', value: 'Jack' },
-  { label: 'JackJackJackJackJackJackJackJackJackJackJack', value: 'Lucy' },
-  {
-    label: 'JackJackJackJackJackJackJackJackJackJackJackJackJack',
-    value: 'Tom',
-  },
-];
+const options = 'i'
+  .repeat(30)
+  .split('')
+  .map((i, index) => ({
+    label: `labelelabelelabelellllabelel${index}`,
+    value: index,
+  }));
 
 function SelectTest() {
   return (
-    <Select
-      open
-      options={options}
-      style={{ width: 200 }}
-      dropdownStyle={{ width: '500px' }}
-    />
+    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Select
+        options={options}
+        style={{ width: 200, margin: '0 20px 20px 0' }}
+      />
+
+      <Select
+        open
+        disablePortal
+        options={options}
+        style={{ width: 200, margin: '0 20px 20px 0' }}
+        onPopupScrollBottom={() => {
+          console.log(1);
+        }}
+      />
+    </div>
   );
 }
 

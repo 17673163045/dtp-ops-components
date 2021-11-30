@@ -1,7 +1,7 @@
 .dropdownWrap {
   box-sizing: border-box;
   margin: 0;
-  padding: 8px 0;
+  padding: 0;
   outline: none;
   list-style: none;
 
@@ -17,6 +17,12 @@
   color: rgba(0, 0, 0, 0.87);
   line-height: 1.5;
   letter-spacing: 0.00938em;
+
+  :global {
+    .MuiAutocomplete-listbox {
+      padding: 6px 0;
+    }
+  }
 }
 
 .dropdownNotMatchSelectWidth {

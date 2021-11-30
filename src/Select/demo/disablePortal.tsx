@@ -10,32 +10,44 @@ const options = [
 
 function DisablePortal() {
   const [open, setOpen] = React.useState(false);
+  const [open2, setOpen2] = React.useState(false);
 
   return (
     <div>
       <p>右击检查弹出层</p>
-      <Button
-        variant="contained"
-        onClick={() => setOpen((pre) => !pre)}
-        style={{ margin: '0 20px 20px 0' }}
-      >
-        Open
-      </Button>
       <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-        <Select
-          label="dropdown渲染在body元素下"
-          options={options}
-          open={open}
-          disablePortal={false}
-          style={{ width: 300, margin: '0 20px 20px 0' }}
-        />
-        <Select
-          style={{ width: 300, margin: '0 20px 20px 0' }}
-          label="dropdown渲染在父元素下"
-          options={options}
-          open={open}
-          disablePortal
-        />
+        <div>
+          <Button
+            variant="contained"
+            onClick={() => setOpen((pre) => !pre)}
+            style={{ margin: '0 20px 20px 0' }}
+          >
+            Open
+          </Button>
+          <Select
+            label="dropdown渲染在body元素下"
+            options={options}
+            open={open}
+            disablePortal={false}
+            style={{ width: 300, margin: '0 20px 20px 0' }}
+          />
+        </div>
+        <div>
+          <Button
+            variant="contained"
+            onClick={() => setOpen2((pre) => !pre)}
+            style={{ margin: '0 20px 20px 0' }}
+          >
+            Open
+          </Button>
+          <Select
+            style={{ width: 300, margin: '0 20px 20px 0' }}
+            label="dropdown渲染在父元素下"
+            options={options}
+            open={open2}
+            disablePortal
+          />
+        </div>
       </div>
     </div>
   );

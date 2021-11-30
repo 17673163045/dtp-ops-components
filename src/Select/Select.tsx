@@ -33,6 +33,7 @@ export interface SelectProps {
   highlightStyle?: React.CSSProperties;
   label?: any;
   labelMap?: string;
+  ListboxComponent?: any;
   listHeight?: number | string;
   loading?: boolean;
   loadingIndicator?: string | React.ReactNode;
@@ -42,6 +43,8 @@ export interface SelectProps {
   open?: boolean;
   options?: any[] | [];
   placeholder?: string;
+  PaperComponent?: any;
+  PopperComponent?: any;
   removeIcon?: any;
   renderOption?: (
     option: Option,
@@ -64,6 +67,8 @@ export interface SelectProps {
   ) => any;
   onDropdownVisibleChange?: (open: boolean, reason?: string, e?: any) => any;
   onOpenChange?: (open: boolean, reason?: string, e?: any) => any;
+  onPopupScroll?: (e?: any) => any;
+  onPopupScrollBottom?: (e?: any) => any;
   onSearch?: (inputValue: string) => any;
 }
 
@@ -82,7 +87,7 @@ import match from 'autosuggest-highlight/match';
 
 const defaultOptions: any[] = [];
 
-const SelectComponentContext = React.createContext<any>(undefined);
+const SelectComponentContext = React.createContext<any>({} as any);
 
 function Select(props: SelectProps) {
   const {
@@ -106,7 +111,6 @@ function Select(props: SelectProps) {
     highlightStyle,
     label,
     labelMap = 'label',
-    listHeight,
     loading,
     loadingIndicator,
     multiple,
@@ -207,9 +211,8 @@ function Select(props: SelectProps) {
 
   function onOpenChange(visible: boolean, reason: string, e: any) {
     setOpenInner(visible);
-    if (onOpenChangeFp) return onOpenChangeFp(visible, reason, e);
-    if (onDropdownVisibleChange)
-      return onDropdownVisibleChange(visible, reason, e);
+    if (onOpenChangeFp) onOpenChangeFp(visible, reason, e);
+    if (onDropdownVisibleChange) onDropdownVisibleChange(visible, reason, e);
   }
 
   function onChange(e: React.SyntheticEvent, newValue: any) {
@@ -340,26 +343,10 @@ function Select(props: SelectProps) {
     .replaceAll('undefined', '')
     .replaceAll('false', '');
 
-  const dropdownContextProps = {
-    dropdownClassName,
-    dropdownMatchSelectWidth,
-    dropdownStyle,
-    dropdownRender,
-  };
-
-  const popupContextProps = {
-    listHeight,
-  };
-
-  const contextProvideValue = {
-    open,
-    onOpenChange,
-    ...dropdownContextProps,
-    ...popupContextProps,
-  };
+  const contextValue = { ...props, open, onOpenChange };
 
   return (
-    <SelectComponentContext.Provider value={contextProvideValue}>
+    <SelectComponentContext.Provider value={contextValue}>
       <Autocomplete
         autoHighlight={!!defaultActiveFirstOption}
         className={wrapClassnames}
@@ -371,6 +358,7 @@ function Select(props: SelectProps) {
         groupBy={groupByFp && groupBy}
         inputValue={searchValue}
         loading={loading}
+        ListboxComponent={ListboxComponent}
         multiple={multiple}
         noOptionsText={notFoundContent}
         onChange={onChange}
@@ -426,19 +414,27 @@ function Select(props: SelectProps) {
   );
 }
 
-function PaperComponent(props: any) {
-  return props.children;
+// 下拉浮层位置
+function PopperComponent(props: any) {
+  const { PopperComponent: PopperComponentFp } = React.useContext(
+    SelectComponentContext,
+  );
+
+  if (PopperComponentFp) return <PopperComponentFp {...props} />;
+
+  return <Popper {...props}></Popper>;
 }
 
-function PopperComponent(props: any) {
+// 下拉容器样式
+function PaperComponent(props: any) {
   const { className, children, ...restProps } = props;
-
   const {
+    PaperComponent: PaperComponentFp,
     dropdownClassName,
     dropdownMatchSelectWidth = true,
     dropdownStyle,
     dropdownRender,
-  } = React.useContext(SelectComponentContext) || {};
+  } = React.useContext(SelectComponentContext);
 
   const classes = `${className} ${dropdownClassName} ${styles.dropdownWrap} ${
     !dropdownMatchSelectWidth && styles.dropdownNotMatchSelectWidth
@@ -448,20 +444,49 @@ function PopperComponent(props: any) {
 
   const renderChildren = dropdownRender ? dropdownRender(children) : children;
 
+  if (PaperComponentFp) return <PaperComponentFp {...props} />;
+
   return (
-    <Popper
+    <div
       {...restProps}
+      className={classes}
+      style={dropdownStyle}
       onMouseDown={(e) => {
-        if (dropdownRender) {
-          e.preventDefault();
-        }
+        if (dropdownRender) e.preventDefault();
       }}
     >
-      <div className={classes} style={dropdownStyle}>
-        {renderChildren}
-      </div>
-    </Popper>
+      {renderChildren}
+    </div>
   );
+}
+
+// 下拉容器list
+function ListboxComponent(props: any) {
+  const {
+    ListboxComponent: ListboxComponentFp,
+    listHeight,
+    onPopupScroll,
+    onPopupScrollBottom,
+  } = React.useContext(SelectComponentContext);
+
+  const { style, ...restProps } = props;
+
+  if (ListboxComponentFp) return <ListboxComponentFp {...props} />;
+
+  const heightStyle = listHeight
+    ? { height: listHeight, maxHeight: listHeight }
+    : {};
+
+  const styles = { ...(style || {}), ...heightStyle };
+
+  function onScroll(e: any) {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    const isScrollBottom = scrollTop + clientHeight === scrollHeight;
+    if (onPopupScroll) onPopupScroll(e);
+    if (isScrollBottom) onPopupScrollBottom(e);
+  }
+
+  return <ul {...restProps} style={styles} onScroll={onScroll}></ul>;
 }
 
 export default Select;
