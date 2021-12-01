@@ -36,6 +36,8 @@ export interface ModalProps {
   type?: 'modal' | 'drawer';
 }
 
+export interface ModalContextProviderValue extends ModalProps {}
+
 export const destroyFns: Array<() => void> = [];
 
 import React from 'react';
@@ -52,7 +54,6 @@ import {
 } from '@mui/material';
 import { LoadingButton as Button } from '@mui/lab';
 import CloseIcon from '@mui/icons-material/Close';
-
 function Modal(props: ModalProps) {
   const {
     visible: outVisible,
@@ -63,6 +64,15 @@ function Modal(props: ModalProps) {
     keyboard = true,
     transitionDirection: transitionDirectionFp,
     type,
+    zIndex,
+    mask,
+    top,
+    width,
+    centered,
+    fullScreen,
+    style,
+    maskStyle,
+    bodyStyle,
   } = props;
 
   const transitionDirection = transitionDirectionFp
@@ -88,12 +98,6 @@ function Modal(props: ModalProps) {
     close,
   });
 
-  const Transition = useTransitionDirection(transitionDirection);
-
-  const ModalStyleOverride = useModalStyleOverride(props, {
-    transitionDirection,
-  });
-
   function onClose(e: any, reason: any) {
     if (reason === 'backdropClick' && !maskClosable) return;
     if (onCancel) {
@@ -106,24 +110,51 @@ function Modal(props: ModalProps) {
     }, 100);
   }
 
+  const providerValue: ModalContextProviderValue = {
+    ...props,
+    transitionDirection,
+  };
+
+  const styleOverrideProps = {
+    zIndex,
+    mask,
+    top,
+    width,
+    centered,
+    fullScreen,
+    style,
+    maskStyle,
+    bodyStyle,
+    type,
+    transitionDirection,
+  };
+
   if (destroyOnClose && !visible) return null;
 
   return (
-    <ModalStyleOverride
-      maxWidth={false}
-      open={visible as any}
-      onClose={onClose}
-      disableEscapeKeyDown={!keyboard}
-      TransitionComponent={Transition}
-      keepMounted={!destroyOnClose}
-    >
-      {modalCloseIcon}
-      {modalTitle}
-      {modalContent}
-      {modalFooter}
-    </ModalStyleOverride>
+    <ModalContext.Provider value={providerValue}>
+      <ModalStyleOverride
+        styleOverrideProps={styleOverrideProps}
+        maxWidth={false}
+        open={visible as any}
+        onClose={onClose}
+        disableEscapeKeyDown={!keyboard}
+        TransitionComponent={transitionDirection && Transition}
+        keepMounted={!destroyOnClose}
+      >
+        {modalCloseIcon}
+        {modalTitle}
+        {modalContent}
+        {modalFooter}
+      </ModalStyleOverride>
+    </ModalContext.Provider>
   );
 }
+
+export const ModalContext = React.createContext(
+  {} as ModalContextProviderValue,
+);
+export const useModalContext = () => React.useContext(ModalContext);
 
 export const useModalVisible = (visibleOut: any) => {
   const [visible, setVisible] = React.useState<any>(visibleOut);
@@ -350,36 +381,12 @@ export const useActionButtons = (
   return { actionButtons };
 };
 
-export const useTransitionDirection = (
-  transitionDirection: TransitionDirection | undefined,
-) => {
-  if (!transitionDirection) return;
+export const Transition = React.forwardRef((props: any, ref: any) => {
+  const { transitionDirection } = useModalContext();
+  return <Slide direction={transitionDirection} ref={ref} {...props} />;
+});
 
-  return React.useMemo(
-    () =>
-      React.forwardRef(function Transition(props: any, ref) {
-        return <Slide direction={transitionDirection} ref={ref} {...props} />;
-      }),
-    [transitionDirection],
-  );
-};
-
-export const useModalStyleOverride = (
-  props: Pick<
-    ModalProps,
-    | 'zIndex'
-    | 'mask'
-    | 'top'
-    | 'width'
-    | 'centered'
-    | 'fullScreen'
-    | 'style'
-    | 'maskStyle'
-    | 'bodyStyle'
-    | 'type'
-  >,
-  { transitionDirection }: any,
-) => {
+export const ModalStyleOverride = styled(Dialog)((props: any) => {
   const {
     zIndex,
     mask = true,
@@ -391,110 +398,94 @@ export const useModalStyleOverride = (
     maskStyle,
     bodyStyle,
     type,
-  } = props;
+    transitionDirection,
+  } = props.styleOverrideProps || {};
 
-  return React.useMemo(
-    () => {
-      const useCentered = centered && !fullScreen && !('top' in props);
-      const isDrawerType = type === 'drawer';
-      const transitionHorizontal =
-        transitionDirection === 'left' || transitionDirection === 'right';
-      const transitionColumn =
-        transitionDirection === 'down' || transitionDirection === 'up';
-      const drawerTypeTransitionHorizontalStyle = {
-        height: '100%',
-        maxHeight: '100%',
-        borderRadius: 0,
-        position: 'absolute',
-        left: transitionDirection === 'right' ? 0 : undefined,
-        right: transitionDirection === 'left' ? 0 : undefined,
-      };
-      const drawerTypeTransitionColumnStyle = {
-        width: '100%',
-        maxWidth: '100%',
-        borderRadius: 0,
-        position: 'absolute',
-        top: transitionDirection === 'down' ? 0 : undefined,
-        bottom: transitionDirection === 'up' ? 0 : undefined,
-      };
+  const useCentered = centered && !fullScreen && !('top' in props);
+  const isDrawerType = type === 'drawer';
+  const transitionHorizontal =
+    transitionDirection === 'left' || transitionDirection === 'right';
+  const transitionColumn =
+    transitionDirection === 'down' || transitionDirection === 'up';
+  const drawerTypeTransitionHorizontalStyle = {
+    height: '100%',
+    maxHeight: '100%',
+    borderRadius: 0,
+    position: 'absolute',
+    left: transitionDirection === 'right' ? 0 : undefined,
+    right: transitionDirection === 'left' ? 0 : undefined,
+  };
+  const drawerTypeTransitionColumnStyle = {
+    width: '100%',
+    maxWidth: '100%',
+    borderRadius: 0,
+    position: 'absolute',
+    top: transitionDirection === 'down' ? 0 : undefined,
+    bottom: transitionDirection === 'up' ? 0 : undefined,
+  };
 
-      const drawerTypeStyle = !isDrawerType
-        ? {}
-        : transitionHorizontal
-        ? drawerTypeTransitionHorizontalStyle
-        : transitionColumn
-        ? drawerTypeTransitionColumnStyle
-        : {};
+  const drawerTypeStyle = !isDrawerType
+    ? {}
+    : transitionHorizontal
+    ? drawerTypeTransitionHorizontalStyle
+    : transitionColumn
+    ? drawerTypeTransitionColumnStyle
+    : {};
 
-      return styled(Dialog)(() => ({
-        // root
-        '&.MuiDialog-root': { zIndex },
-        // mask
-        '& .MuiBackdrop-root': {
-          display: mask ? 'block' : 'none',
-          ...(maskStyle || {}),
-        },
-        // outer
-        '& .MuiDialog-container': {
-          ...(useCentered
-            ? {
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }
-            : { display: 'block' }),
-        },
-        // wrapper
-        '& .MuiPaper-root': {
-          top: useCentered ? undefined : top,
-          width,
-          display: 'block',
-          margin: '0 auto',
-          ...(fullScreen
-            ? {
-                margin: 0,
-                top: 0,
-                left: 0,
-                borderRadius: 0,
-                height: '100%',
-                minHeight: '100vh',
-                maxHeight: '100vh',
-                width: '100%',
-                minWidth: '100%',
-              }
-            : {}),
-          ...drawerTypeStyle,
-          ...(style || {}),
-        },
-        // title
-        '& .MuiDialogTitle-root': {
-          position: 'relative',
-          padding: '16px 24px',
-        },
-        // body
-        '& .MuiDialog-container .MuiDialogContent-root': {
-          padding: 24,
-          maxHeight: 'unset',
-          overflow: 'auto',
-          ...(bodyStyle || {}),
-        },
-      }));
+  return {
+    // root
+    '&.MuiDialog-root': { zIndex },
+    // mask
+    '& .MuiBackdrop-root': {
+      display: mask ? 'block' : 'none',
+      ...(maskStyle || {}),
     },
-    [
-      type,
-      transitionDirection,
-      zIndex,
-      mask,
-      top,
+    // outer
+    '& .MuiDialog-container': {
+      ...(useCentered
+        ? {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }
+        : { display: 'block' }),
+    },
+    // wrapper
+    '& .MuiPaper-root': {
+      top: useCentered ? undefined : top,
       width,
-      centered,
-      fullScreen,
-      style,
-      JSON.stringify(maskStyle),
-      JSON.stringify(bodyStyle),
-    ].map((i) => JSON.stringify(i)),
-  );
-};
+      display: 'block',
+      margin: '0 auto',
+      ...(fullScreen
+        ? {
+            margin: 0,
+            top: 0,
+            left: 0,
+            borderRadius: 0,
+            height: '100%',
+            minHeight: '100vh',
+            maxHeight: '100vh',
+            width: '100%',
+            minWidth: '100%',
+          }
+        : {}),
+      ...drawerTypeStyle,
+      ...(style || {}),
+    },
+    // title
+    '& .MuiDialogTitle-root': {
+      position: 'relative',
+      padding: '16px 24px',
+    },
+    // body
+    '& .MuiDialog-container .MuiDialogContent-root': {
+      padding: 24,
+      maxHeight: 'unset',
+      overflow: 'auto',
+      ...(bodyStyle || {}),
+    },
+  };
+});
 
 Modal.confirm = function confirmFn(props: ModalProps) {
   const config: any = {

@@ -34,7 +34,6 @@ export interface SelectProps {
   label?: any;
   labelMap?: string;
   ListboxComponent?: any;
-  listHeight?: number | string;
   loading?: boolean;
   loadingIndicator?: string | React.ReactNode;
   loadingText?: any;
@@ -434,6 +433,8 @@ function PaperComponent(props: any) {
     dropdownMatchSelectWidth = true,
     dropdownStyle,
     dropdownRender,
+    onPopupScroll,
+    onPopupScrollBottom,
   } = React.useContext(SelectComponentContext);
 
   const classes = `${className} ${dropdownClassName} ${styles.dropdownWrap} ${
@@ -442,7 +443,21 @@ function PaperComponent(props: any) {
     .replaceAll('undefined', '')
     .replaceAll('false', '');
 
+  const dropdownStyles = {
+    height: 'auto',
+    maxHeight: '40vh',
+    overflow: 'auto',
+    ...(dropdownStyle || {}),
+  };
+
   const renderChildren = dropdownRender ? dropdownRender(children) : children;
+
+  function onScroll(e: any) {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    const isScrollBottom = scrollTop + clientHeight === scrollHeight;
+    if (onPopupScroll) onPopupScroll(e);
+    if (isScrollBottom && onPopupScrollBottom) onPopupScrollBottom(e);
+  }
 
   if (PaperComponentFp) return <PaperComponentFp {...props} />;
 
@@ -450,7 +465,8 @@ function PaperComponent(props: any) {
     <div
       {...restProps}
       className={classes}
-      style={dropdownStyle}
+      style={dropdownStyles}
+      onScroll={onScroll}
       onMouseDown={(e) => {
         if (dropdownRender) e.preventDefault();
       }}
@@ -461,32 +477,22 @@ function PaperComponent(props: any) {
 }
 
 // 下拉容器list
-function ListboxComponent(props: any) {
-  const {
-    ListboxComponent: ListboxComponentFp,
-    listHeight,
-    onPopupScroll,
-    onPopupScrollBottom,
-  } = React.useContext(SelectComponentContext);
+const ListboxComponent = React.forwardRef(function (props: any, ref) {
+  const { ListboxComponent: ListboxComponentFp } = React.useContext(
+    SelectComponentContext,
+  );
 
-  const { style, ...restProps } = props;
+  const { ...restProps } = props;
 
   if (ListboxComponentFp) return <ListboxComponentFp {...props} />;
 
-  const heightStyle = listHeight
-    ? { height: listHeight, maxHeight: listHeight }
-    : {};
-
-  const styles = { ...(style || {}), ...heightStyle };
-
-  function onScroll(e: any) {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
-    const isScrollBottom = scrollTop + clientHeight === scrollHeight;
-    if (onPopupScroll) onPopupScroll(e);
-    if (isScrollBottom) onPopupScrollBottom(e);
-  }
-
-  return <ul {...restProps} style={styles} onScroll={onScroll}></ul>;
-}
+  return (
+    <ul
+      ref={ref}
+      {...restProps}
+      style={{ height: 'auto', maxHeight: 'none' }}
+    ></ul>
+  );
+});
 
 export default Select;
