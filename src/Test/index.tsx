@@ -12,9 +12,10 @@ const options = 'i'
 
 function SelectTest() {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+    <div>
       <Select
         options={options}
+        dropdownMatchSelectWidth={false}
         style={{ width: 200, margin: '0 20px 20px 0' }}
       />
 

@@ -35,6 +35,7 @@ export interface SelectProps {
   labelMap?: string;
   ListboxComponent?: any;
   listHeight?: number | string;
+  listStyle?: React.CSSProperties;
   loading?: boolean;
   loadingIndicator?: string | React.ReactNode;
   loadingText?: any;
@@ -54,7 +55,7 @@ export interface SelectProps {
   ) => any;
   searchValue?: string;
   showArrow?: boolean;
-  size?: 'small' | 'middle';
+  size?: 'small' | 'middle' | 'medium';
   showSearch?: boolean;
   style?: React.CSSProperties;
   valueMap?: string;
@@ -74,6 +75,7 @@ export interface SelectProps {
 
 import React from 'react';
 import {
+  Paper,
   Popper,
   TextField,
   Autocomplete,
@@ -93,7 +95,6 @@ function Select(props: SelectProps) {
   const {
     allowClear = false,
     autoHighlight = false,
-    className,
     clearIcon: clearIconFp,
     defaultActiveFirstOption = true,
     defaultOpen,
@@ -127,19 +128,10 @@ function Select(props: SelectProps) {
     renderOption: renderOptionFp,
     searchValue,
     showSearch = false,
-    size: sizeFp,
     valueMap = 'value',
     value: valueFp,
     variant = 'outlined',
-    ...restProps
   } = props;
-
-  const [openInner, setOpenInner] = React.useState(defaultOpen || false);
-
-  const open = React.useMemo(() => {
-    if ('open' in props) return openFp;
-    return openInner;
-  }, [openFp, openInner]);
 
   const options = React.useMemo(() => {
     if (!('options' in props)) return defaultOptions;
@@ -159,15 +151,6 @@ function Select(props: SelectProps) {
     }
     return optionsFp;
   }, [optionsFp]);
-
-  const valueProp = React.useMemo(() => {
-    if ('value' in props) {
-      const value =
-        valueFp === undefined ? (multiple === true ? [] : null) : valueFp;
-      return { value };
-    }
-    return {};
-  }, [valueFp]);
 
   const valueList = React.useMemo(() => {
     return options.map((item: any) => item[valueMap]);
@@ -194,31 +177,6 @@ function Select(props: SelectProps) {
     if (typeof showArrow === 'boolean') return showArrow ? undefined : null;
     return showArrow;
   }, [showArrow]);
-
-  const size = React.useMemo(() => {
-    if (!sizeFp) return 'small';
-    const _size = sizeFp === 'middle' ? 'medium' : sizeFp;
-    return _size;
-  }, [sizeFp]);
-
-  function onClose(e: any, reason: string) {
-    onOpenChange(false, reason, e);
-  }
-
-  function onOpen(e: any) {
-    onOpenChange(true, '', e);
-  }
-
-  function onOpenChange(visible: boolean, reason: string, e: any) {
-    setOpenInner(visible);
-    if (onOpenChangeFp) onOpenChangeFp(visible, reason, e);
-    if (onDropdownVisibleChange) onDropdownVisibleChange(visible, reason, e);
-  }
-
-  function onChange(e: React.SyntheticEvent, newValue: any) {
-    if (onChangeFp)
-      return onChangeFp(newValue as Pick<SelectProps, 'value'>, e);
-  }
 
   function getInputFillText(optionValue: OptionValue): string {
     const optionKey = `${optionValue}.${typeof optionValue}`;
@@ -325,13 +283,6 @@ function Select(props: SelectProps) {
     return _options;
   }
 
-  function onInputChange(e: any, newValue: any, reason: any) {
-    const inputValue = (e && e.target && e.target.value) || '';
-    if (onSearch) {
-      onSearch(inputValue);
-    }
-  }
-
   function groupBy(optionValue: OptionValue) {
     const optionKey = `${optionValue}.${typeof optionValue}`;
     const option = optionValueMapItem[optionKey] || {};
@@ -339,17 +290,29 @@ function Select(props: SelectProps) {
     return '';
   }
 
-  const wrapClassnames = `${className} ${!allowClear && styles.notAllowClear}`
-    .replaceAll('undefined', '')
-    .replaceAll('false', '');
+  const size = useSize(props);
 
-  const contextValue = { ...props, open, onOpenChange };
+  const openProps = useDropdownOpen(props);
+
+  const controlledValueProps = useCntrolledValue(props);
+
+  const className = useClassName(props);
+
+  const components = {
+    PopperComponent,
+    PaperComponent,
+    ListboxComponent,
+  };
+
+  const contextValue = { ...props, size, ...openProps };
 
   return (
     <SelectComponentContext.Provider value={contextValue}>
       <Autocomplete
+        {...openProps}
+        {...components}
+        className={className}
         autoHighlight={!!defaultActiveFirstOption}
-        className={wrapClassnames}
         clearIcon={clearIcon}
         disableCloseOnSelect={disableCloseOnSelect}
         filterOptions={filterOptions}
@@ -358,17 +321,11 @@ function Select(props: SelectProps) {
         groupBy={groupByFp && groupBy}
         inputValue={searchValue}
         loading={loading}
-        ListboxComponent={ListboxComponent}
         multiple={multiple}
         noOptionsText={notFoundContent}
         onChange={onChange}
-        onClose={onClose}
-        onOpen={onOpen}
-        open={open}
+        {...valueProp}
         options={valueList}
-        onInputChange={onInputChange}
-        PaperComponent={PaperComponent}
-        PopperComponent={PopperComponent}
         popupIcon={popupIcon}
         renderInput={(params) => {
           const override_inputProps: any = {};
@@ -406,15 +363,87 @@ function Select(props: SelectProps) {
           );
         }}
         renderOption={renderOption}
-        size={size}
-        {...valueProp}
-        {...restProps}
       />
     </SelectComponentContext.Provider>
   );
 }
 
-// 下拉浮层位置
+export const useCntrolledValue = (props: SelectProps) => {
+  const { value: valueProp, multiple, onChange: onChangeProp } = props;
+
+  const value = React.useMemo(() => {
+    if ('value' in props) {
+      const value =
+        valueProp === undefined ? (multiple === true ? [] : null) : valueProp;
+      return value;
+    }
+  }, [valueProp]);
+
+  function onChange(e: React.SyntheticEvent, newValue: any) {
+    if (onChangeProp) return onChangeProp(newValue, e);
+  }
+
+  return { value, onChange };
+};
+
+export const useClassName = (props: SelectProps) => {
+  const { className, allowClear } = props;
+
+  const wrapClassNames = React.useMemo(() => {
+    return `${className} ${styles.selectWrap} ${
+      !allowClear && styles.notAllowClear
+    }`
+      .replaceAll('undefined', '')
+      .replaceAll('false', '');
+  }, [allowClear, className]);
+
+  return wrapClassNames;
+};
+
+export const useSize = (props: SelectProps) => {
+  const defaultSize = 'small';
+  const { size = defaultSize } = props;
+
+  return React.useMemo(() => {
+    const sizeMap = {
+      small: 'small',
+      middle: 'medium',
+      medium: 'medium',
+    };
+    return sizeMap[size];
+  }, [size]);
+};
+
+export const useDropdownOpen = (props: SelectProps) => {
+  const {
+    defaultOpen,
+    open: openProp,
+    onOpenChange,
+    onDropdownVisibleChange,
+  } = props;
+
+  const open = React.useMemo(() => {
+    if ('open' in props) return openProp;
+  }, [openProp]);
+
+  const openChangeFn = onOpenChange || onDropdownVisibleChange;
+
+  const onClose = (e: any, reason: string) => {
+    if (openChangeFn) {
+      openChangeFn(false, e);
+    }
+  };
+
+  const onOpen = (e: any) => {
+    if (openChangeFn) {
+      openChangeFn(true, e);
+    }
+  };
+
+  return { defaultOpen, open, onClose, onOpen };
+};
+
+// 下拉框浮层组件
 function PopperComponent(props: any) {
   const { PopperComponent: PopperComponentFp } = React.useContext(
     SelectComponentContext,
@@ -425,68 +454,77 @@ function PopperComponent(props: any) {
   return <Popper {...props}></Popper>;
 }
 
-// 下拉容器样式
+// 下拉框容器组件
 function PaperComponent(props: any) {
-  const { className, children, ...restProps } = props;
   const {
-    PaperComponent: PaperComponentFp,
+    dropdownRender,
+    dropdownStyle,
     dropdownClassName,
     dropdownMatchSelectWidth = true,
-    dropdownStyle,
-    dropdownRender,
+    PaperComponent: PaperComponentProp,
   } = React.useContext(SelectComponentContext);
 
-  const classes = `${className} ${dropdownClassName} ${styles.dropdownWrap} ${
-    !dropdownMatchSelectWidth && styles.dropdownNotMatchSelectWidth
-  }`
+  const {
+    className: classNameProp,
+    children: listboxComponentRender,
+    ...restProps
+  } = props;
+
+  const className = `${classNameProp} ${dropdownClassName} ${
+    styles.dropdownWrap
+  } ${!dropdownMatchSelectWidth && styles.dropdownNotMatchSelectWidth}`
     .replaceAll('undefined', '')
     .replaceAll('false', '');
 
-  const renderChildren = dropdownRender ? dropdownRender(children) : children;
+  const style = dropdownStyle;
 
-  if (PaperComponentFp) return <PaperComponentFp {...props} />;
+  const children = dropdownRender
+    ? dropdownRender(listboxComponentRender)
+    : listboxComponentRender;
 
-  return (
-    <div
-      {...restProps}
-      className={classes}
-      style={dropdownStyle}
-      onMouseDown={(e) => {
-        if (dropdownRender) e.preventDefault();
-      }}
-    >
-      {renderChildren}
-    </div>
-  );
+  const onMouseDown = (e: any) => {
+    if (dropdownRender) e.preventDefault();
+  };
+
+  const newProps = {
+    ...restProps,
+    className,
+    style,
+    onMouseDown,
+    children,
+  };
+
+  if (PaperComponentProp) return <PaperComponentProp {...newProps} />;
+
+  return <Paper {...newProps} />;
 }
 
-// 下拉容器list
-function ListboxComponent(props: any) {
+// 下拉框list容器组件
+const ListboxComponent = React.forwardRef(function (props: any, ref) {
   const {
-    ListboxComponent: ListboxComponentFp,
-    listHeight,
+    listStyle,
+    listHeight = 256,
     onPopupScroll,
     onPopupScrollBottom,
+    ListboxComponent: ListboxComponentFp,
   } = React.useContext(SelectComponentContext);
 
-  const { style, ...restProps } = props;
+  const { style: styleProp, ...restProps } = props;
 
-  if (ListboxComponentFp) return <ListboxComponentFp {...props} />;
-
-  const heightStyle = listHeight
-    ? { height: listHeight, maxHeight: listHeight }
-    : {};
-
-  const styles = { ...(style || {}), ...heightStyle };
+  const style = { ...styleProp, ...listStyle, maxHeight: listHeight };
 
   function onScroll(e: any) {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
     const isScrollBottom = scrollTop + clientHeight === scrollHeight;
     if (onPopupScroll) onPopupScroll(e);
-    if (isScrollBottom) onPopupScrollBottom(e);
+    if (isScrollBottom && onPopupScrollBottom) onPopupScrollBottom(e);
   }
 
-  return <ul {...restProps} style={styles} onScroll={onScroll}></ul>;
-}
+  const newProps = { ...restProps, ref, style, onScroll };
+
+  if (ListboxComponentFp) return <ListboxComponentFp {...newProps} />;
+
+  return <ul {...newProps} />;
+});
 
 export default Select;
