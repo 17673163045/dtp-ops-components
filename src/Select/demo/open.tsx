@@ -45,13 +45,13 @@ function Open() {
             style={{ margin: '0 20px 20px 0' }}
             onClick={() => setControlOpen((pre) => !pre)}
           >
-            {controlOpen ? 'open' : 'close'}
+            {controlOpen ? 'opened' : 'closed'}
           </Button>
           <Select
             size="small"
             open={controlOpen}
-            options={options}
             onOpenChange={onOpenChange}
+            options={options}
             style={{ width: 300, margin: '0 20px 20px 0' }}
           />
         </div>
