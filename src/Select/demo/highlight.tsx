@@ -18,7 +18,7 @@ function AutoHighlight() {
     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
       <Select
         showSearch
-        autoHighlight
+        highlight
         options={options}
         style={{ width: 300, margin: '0 20px 20px 0' }}
         label="search word match will highlight"
@@ -26,7 +26,7 @@ function AutoHighlight() {
 
       <Select
         showSearch
-        autoHighlight
+        highlight
         options={options}
         style={{ width: 300, margin: '0 20px 20px 0' }}
         highlightStyle={{
@@ -39,7 +39,7 @@ function AutoHighlight() {
 
       <Select
         showSearch
-        autoHighlight
+        highlight
         options={options}
         style={{ width: 300, margin: '0 20px 20px 0' }}
         highlightOptions={{ insideWords: true, findAllOccurrences: true }}

@@ -22,7 +22,7 @@ function Search() {
         showSearch={showSearch}
         placeholder={showSearch ? 'input to search' : ''}
         size="small"
-        style={{ width: 300, marginTop: 20 }}
+        style={{ width: 300, marginLeft: 20 }}
         options={options}
       />
     </div>

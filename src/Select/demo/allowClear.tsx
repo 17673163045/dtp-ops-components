@@ -3,7 +3,7 @@ import { Select } from 'dtp-ops-components';
 import { Button } from '@mui/material';
 
 const options = [
-  { label: 'Jack', value: 'Jack' },
+  { label: 'fsaaaaaaaaaaaaaaaaafsaaaaaaaaaaaaaaaaaaa', value: 'Jack' },
   { label: 'Lucy', value: 'Lucy' },
   { label: 'Tom', value: 'Tom' },
 ];
@@ -22,6 +22,7 @@ function AllowClear() {
       </Button>
 
       <Select
+        showSearch
         allowClear={allowClear}
         defaultValue="Jack"
         label={allowClear ? 'allowClear' : 'disabledClear'}

@@ -2,6 +2,10 @@
 category: Components
 subtitle: Select
 title: Select
+group:
+  path: /basic
+  title: Basic Components
+  order: 2
 ---
 
 下拉选择器。
@@ -16,9 +20,9 @@ title: Select
 
 <code src='./demo/allowClear.tsx'></code>
 
-### 自动搜索高亮 autoHighlight
+### 自动搜索高亮 highlight
 
-<code src='./demo/autoHighlight.tsx'></code>
+<code src='./demo/highlight.tsx'></code>
 
 ### 默认第一个高亮 defaultActiveFirstOption
 
@@ -127,7 +131,7 @@ title: Select
 | 参数                     | 说明                                                                                                                                                       | 类型                                                                                                           | 默认值                                      | 版本 |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ---- |
 | allowClear               | 支持清除                                                                                                                                                   | boolean                                                                                                        | false                                       |      |
-| autoHighlight            | 搜索模式匹配高亮字符                                                                                                                                       | boolean                                                                                                        | false                                       |      |
+| highlight                | 搜索模式匹配高亮字符                                                                                                                                       | boolean                                                                                                        | false                                       |      |
 | className                | 给最外层容器添加类名                                                                                                                                       | string                                                                                                         |                                             |      |
 | defaultActiveFirstOption | 是否默认高亮第一个选项                                                                                                                                     | boolean                                                                                                        | true                                        |      |
 | defaultOpen              | 是否默认展开下拉菜单                                                                                                                                       | boolean                                                                                                        | -                                           |      |

@@ -3,6 +3,10 @@ type: 反馈
 category: Components
 subtitle: 对话框
 title: Modal
+group:
+  path: /basic
+  title: Basic Components
+  order: 2
 ---
 
 模态对话框。
