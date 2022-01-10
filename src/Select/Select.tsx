@@ -115,7 +115,7 @@ function Select(props: SelectProps) {
     valueMap = 'value',
   } = props;
 
-  const propNameMap = usePorpNameMap(props);
+  const propNameMap = usePropNameMap(props);
 
   const size = useSize(props);
 
@@ -134,17 +134,14 @@ function Select(props: SelectProps) {
     { valueInner },
   );
 
-  function getOption(optionValue: OptionValue) {
-    const defaultOption = { [labelMap]: undefined, [valueMap]: optionValue };
+  function getOption(
+    optionValue: string | number | labelInValueOptionValue | null | undefined,
+  ): { operated: any; origin: any } {
+    const defaultOption = {
+      operated: { label: '', value: null },
+      origin: undefined,
+    };
     if (optionValue === null || optionValue === undefined) return defaultOption;
-
-    if (Array.isArray(optionValue)) {
-      return optionValue.map((itemValue) => {
-        if (typeof itemValue === 'object') return itemValue;
-        const itemValueKey = `${itemValue}.${typeof itemValue}`;
-        return optionValueMapItem[itemValueKey];
-      });
-    }
 
     if (typeof optionValue === 'object') {
       const value = optionValue[valueMap];
@@ -153,13 +150,12 @@ function Select(props: SelectProps) {
     }
 
     const key = `${optionValue}.${typeof optionValue}`;
-    const option = optionValueMapItem[key] || defaultOption;
-    return option;
+    return optionValueMapItem[key] || defaultOption;
   }
 
   function renderInputFillText(optionValue: string | number): string {
-    const option = getOption(optionValue);
-    const defaultText = option[labelMap];
+    const { operated: operatedOption } = getOption(optionValue);
+    const defaultText = operatedOption.label;
     if (defaultText !== undefined && defaultText !== null) return defaultText;
     return String(optionValue);
   }
@@ -182,7 +178,8 @@ function Select(props: SelectProps) {
 
   function filterOption(valueOptions: any, { inputValue }: any) {
     const defaultFilterFn = (inputValue: any, option: any) => {
-      const label = option[labelMap];
+      const label =
+        typeof option === 'object' ? option[labelMap] : String(option);
       return label.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0;
     };
 
@@ -192,14 +189,14 @@ function Select(props: SelectProps) {
         : defaultFilterFn;
 
     const filtered = valueOptions.filter((optionValue: any) => {
-      const option = getOption(optionValue);
-      return filterFn(inputValue || '', option);
+      const { origin: originOption } = getOption(optionValue);
+      return filterFn(inputValue || '', originOption);
     });
 
     if (multiple && freeSolo && inputValue) {
       const isInputValueInFiltered = !!filtered.filter((value: any) => {
-        const option = getOption(value);
-        return value === inputValue || option[labelMap] === inputValue;
+        const { operated: operatedOption } = getOption(value);
+        return value === inputValue || operatedOption.label === inputValue;
       })[0];
       if (isInputValueInFiltered) return filtered;
       return [...filtered, inputValue];
@@ -211,8 +208,8 @@ function Select(props: SelectProps) {
   }
 
   function groupBy(optionValue: OptionValue) {
-    const option = getOption(optionValue);
-    if (groupByProp) return groupByProp(option);
+    const { origin: originOption } = getOption(optionValue);
+    if (groupByProp) return groupByProp(originOption);
     return '';
   }
 
@@ -225,10 +222,9 @@ function Select(props: SelectProps) {
   const contextValue = {
     ...props,
     size,
-    optionsOperated,
     getOption,
+    optionsOperated,
     valueOptions,
-    optionValueMapItem,
     ...valueProps,
     ...openProps,
   };
@@ -254,7 +250,7 @@ function Select(props: SelectProps) {
   );
 }
 
-export const usePorpNameMap = (props: SelectProps) => {
+export const usePropNameMap = (props: SelectProps) => {
   const {
     allowClear,
     clearIcon: clearIconProp,
@@ -312,6 +308,15 @@ export const useOptions = (props: SelectProps, { valueInner }: any) => {
 
   const value = 'value' in props ? valueProp : valueInner;
 
+  const operateOption = (option: any, labelMap: string, valueMap: string) => {
+    if (typeof option === 'object') {
+      const label = option[labelMap];
+      const value = option[valueMap];
+      return { label, value };
+    }
+    return { label: option, value: option };
+  };
+
   const optionsOperated = React.useMemo(() => {
     const defaultOptions: any[] = [];
 
@@ -325,58 +330,37 @@ export const useOptions = (props: SelectProps, { valueInner }: any) => {
     if (!Array.isArray(optionsProp))
       throw new Error('Select Options must be array!');
 
-    const isOptionNotObject = optionsProp.some(
-      (item) => typeof item !== 'object',
+    return optionsProp.map((option) =>
+      operateOption(option, labelMap, valueMap),
     );
-    if (isOptionNotObject) {
-      return optionsProp.map((item) => {
-        if (typeof item === 'object') return item;
-        return { [labelMap]: String(item), [valueMap]: item };
-      });
-    }
+  }, [optionsProp, labelMap, valueMap]);
 
-    return optionsProp;
-  }, [optionsProp]);
+  const valueOptions = optionsOperated.map((option) => option.value);
 
-  const valueOptions = optionsOperated.map((item: any) => item[valueMap]);
+  const optionsByValue = React.useMemo(() => {
+    return Array.isArray(value) ? value : [value];
+  }, [value, labelMap, valueMap]);
 
   const optionValueMapItem = React.useMemo(() => {
     const result: any = {};
     let optionList = [];
 
-    const getOptionsByValue = (value: any) => {
-      let optionsByValue = [];
-      if (Array.isArray(value)) {
-        optionsByValue = value.map((v: any) => {
-          if (typeof v === 'object') return v;
-          return { [labelMap]: String(v), [valueMap]: v };
-        });
-      } else if (typeof value === 'object') {
-        optionsByValue = [value];
-      } else {
-        const option = { [labelMap]: String(value), [valueMap]: value };
-        optionsByValue = [option];
-      }
-
-      return optionsByValue;
-    };
-
     if (optionsOperated.length) {
       optionList = optionsOperated;
     }
     if (!optionsOperated.length && value) {
-      const optionsByValue = getOptionsByValue(value);
       optionList = optionsByValue;
     }
 
-    optionList.forEach((item: any) => {
-      const optionValue = item[valueMap];
-      const key = `${optionValue}.${typeof optionValue}`;
-      result[key] = item;
+    optionList.forEach((option: any) => {
+      const operated = operateOption(option, labelMap, valueMap);
+      const { value } = operated;
+      const key = `${value}.${typeof value}`;
+      result[key] = { operated, origin: option };
     });
 
     return result;
-  }, [optionsOperated, value]);
+  }, [optionsOperated, optionsByValue, value, labelMap, valueMap]);
 
   return { optionsOperated, valueOptions, optionValueMapItem };
 };
@@ -428,14 +412,20 @@ export const useSelectValue = (props: SelectProps, { getOption }: any) => {
     if (Array.isArray(newValue)) {
       if (labelInValue) {
         value = newValue.map((v) => {
-          const option = getOption(v);
-          return { [labelMap]: option[labelMap], [valueMap]: option[valueMap] };
+          const { operated: operatedOption } = getOption(v);
+          return {
+            [labelMap]: operatedOption.label,
+            [valueMap]: operatedOption.value,
+          };
         });
       }
     } else {
       if (labelInValue) {
-        const option = getOption(newValue);
-        value = { [labelMap]: option[labelMap], [valueMap]: option[valueMap] };
+        const { operated: operatedOption } = getOption(newValue);
+        value = {
+          [labelMap]: operatedOption[labelMap],
+          [valueMap]: operatedOption[valueMap],
+        };
       }
     }
 
@@ -686,8 +676,6 @@ export function OptionItem(props: any) {
   const {
     getOption,
     getOptionLabel: getOptionLabelProp,
-    labelMap = 'label',
-    valueMap = 'value',
     highlight,
     highlightOptions,
     highlightStyle,
@@ -705,9 +693,9 @@ export function OptionItem(props: any) {
 
   const style = optionStyle;
 
-  const option = getOption(value);
+  const { operated: operatedOption, origin: originOption } = getOption(value);
 
-  const defaultLabel = option[labelMap] || option[valueMap] || '';
+  const defaultLabel = operatedOption.label || operatedOption.value || '';
 
   const matches = match(defaultLabel, inputValue || '', {
     insideWords: true,
@@ -734,7 +722,7 @@ export function OptionItem(props: any) {
     });
 
   const propLabel =
-    getOptionLabelProp && getOptionLabelProp(option, state, parts);
+    getOptionLabelProp && getOptionLabelProp(originOption, state, parts);
 
   const children = propLabel || highlightLabel || defaultLabel;
 

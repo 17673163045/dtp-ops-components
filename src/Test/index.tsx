@@ -43,6 +43,10 @@ function SelectTest() {
     console.log(value);
   }
 
+  function setSelectValue() {
+    setValue({ label: 'name2', value: 2 });
+  }
+
   function onChange(newValue: any) {
     setValue(newValue);
   }
@@ -55,33 +59,33 @@ function SelectTest() {
           variant="contained"
           onClick={getOptions}
         >
-          Set Options
+          Get Options
         </Button>
         <Button
           style={{ margin: '0 20px 20px 0' }}
           variant="contained"
           onClick={() => setOptions([])}
         >
-          clear Options
+          Clear Options
         </Button>
         <Button
           style={{ margin: '0 20px 20px 0' }}
           variant="contained"
           onClick={getValue}
         >
-          get Value
+          Get Value
         </Button>
         <Button
           style={{ margin: '0 20px 20px 0' }}
           variant="contained"
-          onClick={() => setValue('name1')}
+          onClick={setSelectValue}
         >
-          set Value
+          Set Value
         </Button>
       </div>
 
       <Select
-        freeSolo
+        labelInValue
         allowClear
         showSearch
         value={value}
