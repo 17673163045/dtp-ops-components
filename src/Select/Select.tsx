@@ -2,8 +2,8 @@ type RenderOptionsState = {
   selected: boolean;
   inputValue: string | undefined;
 };
-type Option = { [prop: string]: any };
-type labelInValueOptionValue = { [labelMapOrValueMap: string]: any };
+type Option = Record<string, any>;
+type labelInValueOptionValue = Record<string, any>;
 type OptionValue =
   | null
   | undefined
@@ -19,6 +19,7 @@ export interface SelectProps {
   allowClear?: boolean;
   clearIcon?: any;
   className?: string;
+  check?: boolean;
   defaultActiveFirstOption?: boolean;
   defaultOpen?: boolean;
   defaultValue?: string | number | string[] | number[] | [];
@@ -45,6 +46,7 @@ export interface SelectProps {
   label?: any;
   labelInValue?: boolean;
   labelMap?: string;
+  limitTags?: number;
   ListboxComponent?: any;
   listHeight?: number | string;
   listStyle?: React.CSSProperties;
@@ -85,7 +87,7 @@ export interface SelectProps {
   onOpenChange?: (open: boolean, reason?: string, e?: any) => any;
   onPopupScroll?: (e?: any) => any;
   onPopupScrollBottom?: (e?: any) => any;
-  onSearch?: (inputValue: string, reason: 'input' | 'clear' | 'reset') => any;
+  onSearch?: (inputValue: string) => any;
 }
 
 import React from 'react';
@@ -95,6 +97,7 @@ import {
   TextField,
   Autocomplete,
   CircularProgress,
+  Checkbox,
 } from '@mui/material';
 
 import styles from './Select.less';
@@ -136,7 +139,10 @@ function Select(props: SelectProps) {
 
   function getOption(
     optionValue: string | number | labelInValueOptionValue | null | undefined,
-  ): { operated: any; origin: any } {
+  ): {
+    operated: any;
+    origin: any;
+  } {
     const defaultOption = {
       operated: { label: '', value: null },
       origin: undefined,
@@ -154,6 +160,7 @@ function Select(props: SelectProps) {
   }
 
   function renderInputFillText(optionValue: string | number): string {
+    if (freeSolo) return String(optionValue);
     const { operated: operatedOption } = getOption(optionValue);
     const defaultText = operatedOption.label;
     if (defaultText !== undefined && defaultText !== null) return defaultText;
@@ -170,9 +177,8 @@ function Select(props: SelectProps) {
   }
 
   function getOptionDisabled(optionValue: OptionValue): boolean {
-    const optionKey = `${optionValue}.${typeof optionValue}`;
-    const option = optionValueMapItem[optionKey] || {};
-    if (getOptionDisabledProp) return getOptionDisabledProp(option);
+    const { origin: originOption } = getOption(optionValue);
+    if (getOptionDisabledProp) return getOptionDisabledProp(originOption);
     return false;
   }
 
@@ -237,6 +243,7 @@ function Select(props: SelectProps) {
         {...inputValueProps}
         {...openProps}
         {...components}
+        ChipProps={{ size }}
         className={className}
         filterOptions={filterOption}
         getOptionDisabled={getOptionDisabled}
@@ -252,10 +259,11 @@ function Select(props: SelectProps) {
 
 export const usePropNameMap = (props: SelectProps) => {
   const {
-    allowClear,
+    allowClear = true,
     clearIcon: clearIconProp,
     defaultActiveFirstOption = true,
     freeSolo = false,
+    limitTags,
     loading,
     multiple,
     removeIcon,
@@ -290,6 +298,7 @@ export const usePropNameMap = (props: SelectProps) => {
     disableCloseOnSelect,
     forcePopupIcon,
     freeSolo,
+    limitTags,
     loading,
     multiple,
     noOptionsText,
@@ -345,10 +354,10 @@ export const useOptions = (props: SelectProps, { valueInner }: any) => {
     const result: any = {};
     let optionList = [];
 
-    if (optionsOperated.length) {
-      optionList = optionsOperated;
+    if (Array.isArray(optionsProp) && optionsProp.length) {
+      optionList = optionsProp;
     }
-    if (!optionsOperated.length && value) {
+    if (Array.isArray(optionsProp) && !optionsProp.length && value) {
       optionList = optionsByValue;
     }
 
@@ -360,7 +369,7 @@ export const useOptions = (props: SelectProps, { valueInner }: any) => {
     });
 
     return result;
-  }, [optionsOperated, optionsByValue, value, labelMap, valueMap]);
+  }, [optionsProp, optionsByValue, value, labelMap, valueMap]);
 
   return { optionsOperated, valueOptions, optionValueMapItem };
 };
@@ -423,8 +432,8 @@ export const useSelectValue = (props: SelectProps, { getOption }: any) => {
       if (labelInValue) {
         const { operated: operatedOption } = getOption(newValue);
         value = {
-          [labelMap]: operatedOption[labelMap],
-          [valueMap]: operatedOption[valueMap],
+          [labelMap]: operatedOption.label,
+          [valueMap]: operatedOption.value,
         };
       }
     }
@@ -452,8 +461,8 @@ export const useInputValue = (props: SelectProps, { onChange }: any) => {
     newValue: any,
     reason: 'input' | 'clear' | 'reset',
   ) {
-    if (onSearch) {
-      onSearch(newValue, reason);
+    if (onSearch && reason === 'input') {
+      onSearch(newValue);
     }
     setInputValue(newValue);
 
@@ -481,7 +490,7 @@ export const useClassName = (props: SelectProps) => {
   return wrapClassNames;
 };
 
-export const useSize = (props: SelectProps) => {
+export const useSize = (props: SelectProps): 'small' | 'medium' => {
   const defaultSize = 'small';
   const { size = defaultSize } = props;
 
@@ -491,7 +500,7 @@ export const useSize = (props: SelectProps) => {
       middle: 'medium',
       medium: 'medium',
     };
-    return sizeMap[size];
+    return sizeMap[size] as 'small' | 'medium';
   }, [size]);
 };
 
@@ -531,10 +540,11 @@ export const useDropdownOpen = (props: SelectProps) => {
 
 export function RenderInput(props: any) {
   const {
-    placeholder,
+    placeholder = 'Please Select',
     variant = 'outlined',
+    label,
     size,
-    showSearch,
+    showSearch = true,
     loading,
     loadingIndicator,
   } = React.useContext(SelectComponentContext);
@@ -567,6 +577,7 @@ export function RenderInput(props: any) {
 
   const newProps = {
     ...restProps,
+    label,
     size,
     placeholder,
     variant,
@@ -601,7 +612,7 @@ export function PopperComponent(props: any) {
 
   if (PopperComponentFp) return <PopperComponentFp {...newProps} />;
 
-  return <Popper {...newProps}></Popper>;
+  return <Popper {...newProps} />;
 }
 
 // 下拉框容器组件
@@ -674,6 +685,7 @@ export const ListboxComponent = React.forwardRef(function (props: any, ref) {
 
 export function OptionItem(props: any) {
   const {
+    check,
     getOption,
     getOptionLabel: getOptionLabelProp,
     highlight,
@@ -685,7 +697,7 @@ export function OptionItem(props: any) {
   } = React.useContext(SelectComponentContext);
 
   const { state, value, className: classNameProp, ...restProps } = props;
-  const { inputValue } = state;
+  const { inputValue, selected } = state;
 
   const className = `${classNameProp} ${optionClassName}`
     .replaceAll('undefined', '')
@@ -721,16 +733,23 @@ export function OptionItem(props: any) {
       );
     });
 
+  const checkLabel = check && <Checkbox checked={selected} />;
+
   const propLabel =
     getOptionLabelProp && getOptionLabelProp(originOption, state, parts);
 
-  const children = propLabel || highlightLabel || defaultLabel;
+  const children = (
+    <>
+      {checkLabel}
+      {propLabel || highlightLabel || defaultLabel}
+    </>
+  );
 
   const newProps = { ...restProps, className, style, children };
 
   if (OptionComponent) return <OptionComponent {...newProps} />;
 
-  return <li {...newProps}></li>;
+  return <li {...newProps} />;
 }
 
 export default Select;
