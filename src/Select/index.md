@@ -16,6 +16,10 @@ group:
 
 ## 代码演示
 
+<code src='./demo/basicUse.tsx' desc='基本使用。'></code>
+
+<code src='./demo/tagMode.tsx' desc='tags select，随意输入的内容'></code>
+
 ### 允许清除 allowClear
 
 <code src='./demo/allowClear.tsx'></code>
