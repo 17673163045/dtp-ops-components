@@ -1,46 +1,76 @@
-type RenderOptionsState = {
+type Option = { [key: string]: string | number } | string | number;
+type OptionList = [] | Option[];
+type LabelInValuedValue = Record<string, any>;
+type Value =
+  | undefined
+  | null
+  | number
+  | string
+  | LabelInValuedValue
+  | []
+  | (string | number | LabelInValuedValue)[];
+type OnChange = (value: Value, e: React.SyntheticEvent) => any;
+
+type OptionOperated = { label: any; value: any };
+type OptionValue = string | number;
+type OptionValueList = [] | (string | number)[];
+type OptionOperatedList = [] | OptionOperated[];
+type OptionValueMapItem = {
+  [valueKey: string]: { operated: OptionOperated; origin: Option };
+};
+
+type OptionState = {
   selected: boolean;
   inputValue: string | undefined;
 };
-type Option = { [prop: string]: any };
-type OptionValue = string | number;
+
+type Style = React.CSSProperties;
 
 export interface SelectProps {
   allowClear?: boolean;
-  autoHighlight?: boolean;
   clearIcon?: any;
   className?: string;
+  check?: boolean;
   defaultActiveFirstOption?: boolean;
   defaultOpen?: boolean;
-  defaultValue?: string | number | string[] | number[] | [];
+  defaultValue?: any;
   disabled?: boolean;
   disableCloseOnSelect?: boolean;
   disablePortal?: boolean;
   dropdownClassName?: string;
   dropdownMatchSelectWidth?: boolean;
-  dropdownStyle?: React.CSSProperties;
-  dropdownRender?: (originNode: any) => any;
+  dropdownStyle?: Style;
+  dropdownRender?: (originList: any) => any;
   filterOption?: false | ((inputValue: string, option: Option) => boolean);
   fullWidth?: boolean;
+  freeSolo?: boolean;
   getOptionDisabled?: (option: Option) => boolean;
   getOptionLabel?: (
     option: Option,
-    state: RenderOptionsState,
+    state: OptionState,
     parts?: any[],
   ) => React.ReactNode | undefined | null;
   groupBy?: (option: Option) => string;
+  highlight?: boolean;
   highlightOptions?: { insideWords?: boolean; findAllOccurrences?: boolean };
   highlightStyle?: React.CSSProperties;
   label?: any;
+  labelInValue?: boolean;
   labelMap?: string;
+  limitTags?: number;
   ListboxComponent?: any;
+  listHeight?: number | string;
+  listStyle?: React.CSSProperties;
   loading?: boolean;
   loadingIndicator?: string | React.ReactNode;
   loadingText?: any;
   multiple?: boolean;
   notFoundContent?: any;
   open?: boolean;
-  options?: any[] | [];
+  optionClassName?: string;
+  optionStyle?: React.CSSProperties;
+  OptionComponent?: any;
+  options?: OptionList;
   placeholder?: string;
   PaperComponent?: any;
   PopperComponent?: any;
@@ -48,35 +78,35 @@ export interface SelectProps {
   renderOption?: (
     option: Option,
     itemProps: any,
-    state: RenderOptionsState,
+    state: OptionState,
     parts?: any[],
   ) => any;
-  searchValue?: string;
-  showArrow?: boolean;
-  size?: 'small' | 'middle';
+  inputValue?: string;
+  showArrow?: boolean | React.ReactNode;
+  size?: 'small' | 'middle' | 'medium';
   showSearch?: boolean;
-  style?: React.CSSProperties;
+  style?: Style;
+  tagMode?: boolean;
   valueMap?: string;
-  value?: string | number | string[] | number[] | [];
+  value?: Value;
   variant?: 'outlined' | 'filled' | 'standard';
-
-  onChange?: (
-    value: Pick<SelectProps, 'value'>,
-    e: React.SyntheticEvent,
-  ) => any;
-  onDropdownVisibleChange?: (open: boolean, reason?: string, e?: any) => any;
-  onOpenChange?: (open: boolean, reason?: string, e?: any) => any;
+  onChange?: OnChange;
+  onDropdownVisibleChange?: (visible: boolean, reason?: string, e?: any) => any;
+  onInputChange?: (inputValue: string, reason?: string, e?: any) => any;
+  onOpenChange?: (visible: boolean, reason?: string, e?: any) => any;
   onPopupScroll?: (e?: any) => any;
   onPopupScrollBottom?: (e?: any) => any;
-  onSearch?: (inputValue: string) => any;
+  onSearch?: (inputValue: string, reason?: string) => any;
 }
 
 import React from 'react';
 import {
+  Paper,
   Popper,
   TextField,
   Autocomplete,
   CircularProgress,
+  Checkbox,
 } from '@mui/material';
 
 import styles from './Select.less';
@@ -84,415 +114,697 @@ import styles from './Select.less';
 import parse from 'autosuggest-highlight/parse';
 import match from 'autosuggest-highlight/match';
 
-const defaultOptions: any[] = [];
-
 const SelectComponentContext = React.createContext<any>({} as any);
 
 function Select(props: SelectProps) {
   const {
-    allowClear = false,
-    autoHighlight = false,
-    className,
-    clearIcon: clearIconFp,
-    defaultActiveFirstOption = true,
-    defaultOpen,
-    disableCloseOnSelect: disableCloseOnSelectFp,
-    dropdownClassName,
-    dropdownMatchSelectWidth,
-    dropdownStyle,
-    dropdownRender,
-    filterOption,
-    fullWidth = true,
-    getOptionDisabled: getOptionDisabledFp,
-    getOptionLabel: getOptionLabelFp,
-    groupBy: groupByFp,
-    highlightOptions,
-    highlightStyle,
-    label,
+    filterOption: filterOptionProp,
+    freeSolo = false,
+    getOptionDisabled: getOptionDisabledProp,
+    groupBy: groupByProp,
     labelMap = 'label',
-    loading,
-    loadingIndicator,
-    multiple,
-    notFoundContent,
-    onChange: onChangeFp,
-    open: openFp,
-    onDropdownVisibleChange,
-    onOpenChange: onOpenChangeFp,
-    options: optionsFp,
-    onSearch,
-    placeholder,
-    removeIcon,
-    showArrow = true,
-    renderOption: renderOptionFp,
-    searchValue,
-    showSearch = false,
-    size: sizeFp,
+    multiple = false,
+    tagMode = false,
     valueMap = 'value',
-    value: valueFp,
-    variant = 'outlined',
-    ...restProps
   } = props;
 
-  const [openInner, setOpenInner] = React.useState(defaultOpen || false);
+  const propNameMap = usePropNameMap(props);
 
-  const open = React.useMemo(() => {
-    if ('open' in props) return openFp;
-    return openInner;
-  }, [openFp, openInner]);
+  const size = useSize(props);
 
-  const options = React.useMemo(() => {
-    if (!('options' in props)) return defaultOptions;
-    if (optionsFp === null || optionsFp === undefined) return defaultOptions;
-    if (!Array.isArray(optionsFp))
-      throw new Error('Select Options must be array!');
-    if (
-      optionsFp.length &&
-      optionsFp.some((item) => typeof item !== 'object')
-    ) {
-      const optionsMap = optionsFp.map((item) => {
-        if (typeof item !== 'object')
-          return { [labelMap]: item, [valueMap]: item };
-        return item;
-      });
-      return optionsMap;
-    }
-    return optionsFp;
-  }, [optionsFp]);
+  const className = useClassName(props);
 
-  const valueProp = React.useMemo(() => {
-    if ('value' in props) {
-      const value =
-        valueFp === undefined ? (multiple === true ? [] : null) : valueFp;
-      return { value };
-    }
-    return {};
-  }, [valueFp]);
+  const openProps = useDropdownOpen(props);
 
-  const valueList = React.useMemo(() => {
-    return options.map((item: any) => item[valueMap]);
-  }, [options]);
+  const { valueProps, valueInner } = useSelectValue(props, { getOption });
 
-  const optionValueMapItem = React.useMemo(() => {
-    const result: any = {};
-    options.forEach((item: any) => {
-      const optionValue = item[valueMap];
-      const key = `${optionValue}.${typeof optionValue}`;
-      result[key] = item;
-    });
-    return result;
-  }, [options]);
+  const inputValueProps = useInputValue(props, {
+    onChange: valueProps.onChange,
+    value: valueProps.value,
+  });
 
-  const disableCloseOnSelect = React.useMemo(() => {
-    if ('disableCloseOnSelect' in props) return disableCloseOnSelectFp;
-    return !!multiple;
-  }, [disableCloseOnSelectFp]);
+  const { optionsOperated, valueOptions, optionValueMapItem } = useOptions(
+    props,
+    { valueInner },
+  );
 
-  const clearIcon = !allowClear ? null : clearIconFp || removeIcon;
-
-  const popupIcon = React.useMemo(() => {
-    if (typeof showArrow === 'boolean') return showArrow ? undefined : null;
-    return showArrow;
-  }, [showArrow]);
-
-  const size = React.useMemo(() => {
-    if (!sizeFp) return 'small';
-    const _size = sizeFp === 'middle' ? 'medium' : sizeFp;
-    return _size;
-  }, [sizeFp]);
-
-  function onClose(e: any, reason: string) {
-    onOpenChange(false, reason, e);
-  }
-
-  function onOpen(e: any) {
-    onOpenChange(true, '', e);
-  }
-
-  function onOpenChange(visible: boolean, reason: string, e: any) {
-    setOpenInner(visible);
-    if (onOpenChangeFp) onOpenChangeFp(visible, reason, e);
-    if (onDropdownVisibleChange) onDropdownVisibleChange(visible, reason, e);
-  }
-
-  function onChange(e: React.SyntheticEvent, newValue: any) {
-    if (onChangeFp)
-      return onChangeFp(newValue as Pick<SelectProps, 'value'>, e);
-  }
-
-  function getInputFillText(optionValue: OptionValue): string {
-    const optionKey = `${optionValue}.${typeof optionValue}`;
-    const option = optionValueMapItem[optionKey] || {};
-    return option[labelMap] || String(optionValue);
-  }
-
-  function getOptionLabel(
-    option: Option,
-    state: RenderOptionsState,
-    parts?: any[],
-  ): React.ReactNode | null {
-    if (getOptionLabelFp) return getOptionLabelFp(option, state, parts);
-    const labelText = option[labelMap];
-    return labelText !== undefined ? String(labelText) : '';
-  }
-
-  function renderOption(
-    props: any,
-    optionValue: OptionValue,
-    state: RenderOptionsState,
-  ) {
-    const option = optionValueMapItem[`${optionValue}.${typeof optionValue}`];
-
-    const getHighlightRender = (highlightNodeProps = {} as any) => {
-      const { style: highlightStyle } = highlightNodeProps;
-      const { inputValue } = state;
-      const optionString =
-        typeof option === 'object' ? option[labelMap] : String(option);
-      const matches = match(optionString, inputValue || '', {
-        insideWords: true,
-        findAllOccurrences: false,
-        ...highlightOptions,
-      });
-      const parts = parse(optionString, matches);
-      const style = {
-        fontWeight: 700,
-        color: 'red',
-        ...(highlightStyle || {}),
-      };
-      const highlightNodes = parts.map((part: any, index: any) => {
-        return part.highlight ? (
-          <span key={index} {...highlightNodeProps} style={style}>
-            {part.text}
-          </span>
-        ) : (
-          <span key={index}>{part.text}</span>
-        );
-      });
-      return { parts, highlightNodes };
+  function getOption(
+    optionValue: string | number | LabelInValuedValue | null | undefined,
+  ): {
+    operated: any;
+    origin: any;
+  } {
+    const defaultOption = {
+      operated: { label: '', value: null },
+      origin: undefined,
     };
+    if (optionValue === null || optionValue === undefined) return defaultOption;
 
-    const { parts, highlightNodes } = getHighlightRender({
-      style: highlightStyle,
-    });
-
-    if (renderOptionFp) return renderOptionFp(props, option, state, parts);
-
-    let render;
-    switch (true) {
-      case autoHighlight:
-        render = <div>{highlightNodes}</div>;
-        break;
-      default:
-        render = getOptionLabel(option, state, parts);
-        break;
+    if (optionValue !== null && typeof optionValue === 'object') {
+      const value = optionValue[valueMap];
+      const valueKey = `${value}.${typeof value}`;
+      return optionValueMapItem[valueKey] || optionValue;
     }
 
-    return <li {...props}>{render}</li>;
+    const key = `${optionValue}.${typeof optionValue}`;
+    return optionValueMapItem[key] || defaultOption;
+  }
+
+  function renderInputFillText(optionValue: string | number): string {
+    if (freeSolo || tagMode) return String(optionValue);
+    const { operated: operatedOption } = getOption(optionValue);
+    const defaultText = operatedOption.label;
+    if (defaultText !== undefined && defaultText !== null) return defaultText;
+    return String(optionValue);
+  }
+
+  function renderOption(props: any, value: OptionValue, state: OptionState) {
+    const OptionProps = { ...props, state, value };
+    return <OptionItem {...OptionProps} />;
   }
 
   function getOptionDisabled(optionValue: OptionValue): boolean {
-    const optionKey = `${optionValue}.${typeof optionValue}`;
-    const option = optionValueMapItem[optionKey] || {};
-    if (getOptionDisabledFp) return getOptionDisabledFp(option);
+    const { origin: originOption } = getOption(optionValue);
+    if (getOptionDisabledProp) return getOptionDisabledProp(originOption);
     return false;
   }
 
-  function filterOptions(options: any, { inputValue }: any) {
-    let _options;
-
-    if (filterOption === false) {
-      _options = options;
-    }
-
-    if (typeof filterOption === 'function') {
-      const filteredOptions = options.filter((optionValue: any) => {
-        const option =
-          optionValueMapItem[`${optionValue}.${typeof optionValue}`];
-        return filterOption(inputValue, option);
-      });
-      _options = filteredOptions;
-    }
-
-    const defaultFilterFn = (optionValue: any) => {
-      const optionKey = `${optionValue}.${typeof optionValue}`;
-      const option = optionValueMapItem[optionKey] || {};
-      const label = option[labelMap] || '';
-      return String(label).toLowerCase().indexOf(inputValue.toLowerCase()) >= 0;
+  function filterOption(valueOptions: any, { inputValue }: any) {
+    const defaultFilterFn = (inputValue: any, option: any) => {
+      const label =
+        option !== null && typeof option === 'object'
+          ? option[labelMap]
+          : option;
+      const stringLabel =
+        label === null || label === undefined ? '' : String(label);
+      return stringLabel.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0;
     };
-    const defaultFilteredOptions = options.filter(defaultFilterFn);
-    _options = defaultFilteredOptions;
 
-    return _options;
-  }
+    const filterFn =
+      typeof filterOptionProp === 'function'
+        ? filterOptionProp
+        : defaultFilterFn;
 
-  function onInputChange(e: any, newValue: any, reason: any) {
-    const inputValue = (e && e.target && e.target.value) || '';
-    if (onSearch) {
-      onSearch(inputValue);
+    const filtered = valueOptions.filter((optionValue: any) => {
+      const { origin: originOption } = getOption(optionValue);
+      return filterFn(inputValue || '', originOption);
+    });
+
+    if (tagMode) {
+      const isInputValueInFiltered = !!filtered.filter((value: any) => {
+        const { operated: operatedOption } = getOption(value);
+        return value === inputValue || operatedOption.label === inputValue;
+      })[0];
+      if (isInputValueInFiltered || !inputValue) return filtered;
+      return [...filtered, inputValue];
     }
+
+    if (filterOptionProp === false) return valueOptions;
+
+    return filtered;
   }
 
   function groupBy(optionValue: OptionValue) {
-    const optionKey = `${optionValue}.${typeof optionValue}`;
-    const option = optionValueMapItem[optionKey] || {};
-    if (groupByFp) return groupByFp(option);
+    const { origin: originOption } = getOption(optionValue);
+    if (groupByProp) return groupByProp(originOption);
     return '';
   }
 
-  const wrapClassnames = `${className} ${!allowClear && styles.notAllowClear}`
-    .replaceAll('undefined', '')
-    .replaceAll('false', '');
+  const components = {
+    PopperComponent,
+    PaperComponent,
+    ListboxComponent,
+  };
 
-  const contextValue = { ...props, open, onOpenChange };
+  const contextValue = {
+    ...props,
+    size,
+    getOption,
+    optionsOperated,
+    valueOptions,
+    ...valueProps,
+    ...openProps,
+  };
 
   return (
     <SelectComponentContext.Provider value={contextValue}>
       <Autocomplete
-        autoHighlight={!!defaultActiveFirstOption}
-        className={wrapClassnames}
-        clearIcon={clearIcon}
-        disableCloseOnSelect={disableCloseOnSelect}
-        filterOptions={filterOptions}
+        {...propNameMap}
+        {...valueProps}
+        {...inputValueProps}
+        {...openProps}
+        {...components}
+        ChipProps={{ size }}
+        className={className}
+        filterOptions={filterOption}
         getOptionDisabled={getOptionDisabled}
-        getOptionLabel={getInputFillText}
-        groupBy={groupByFp && groupBy}
-        inputValue={searchValue}
-        loading={loading}
-        ListboxComponent={ListboxComponent}
-        multiple={multiple}
-        noOptionsText={notFoundContent}
-        onChange={onChange}
-        onClose={onClose}
-        onOpen={onOpen}
-        open={open}
-        options={valueList}
-        onInputChange={onInputChange}
-        PaperComponent={PaperComponent}
-        PopperComponent={PopperComponent}
-        popupIcon={popupIcon}
-        renderInput={(params) => {
-          const override_inputProps: any = {};
-          if (!showSearch) {
-            override_inputProps.unselectable = 'on';
-            override_inputProps.readOnly = true;
-          }
-
-          const override_InputProps: any = {};
-          override_InputProps.endAdornment = loading
-            ? loadingIndicator || (
-                <CircularProgress
-                  color="primary"
-                  size={20}
-                  style={{ position: 'absolute', right: 6 }}
-                />
-              )
-            : params.InputProps.endAdornment;
-          return (
-            <TextField
-              placeholder={placeholder}
-              label={label}
-              variant={variant}
-              {...params}
-              InputProps={{
-                ...params.InputProps,
-                ...override_InputProps,
-              }}
-              inputProps={{
-                ...params.inputProps,
-                ...override_inputProps,
-              }}
-              fullWidth={fullWidth}
-            />
-          );
-        }}
+        getOptionLabel={renderInputFillText}
+        groupBy={groupByProp && groupBy}
+        options={valueOptions}
+        renderInput={RenderInput}
         renderOption={renderOption}
-        size={size}
-        {...valueProp}
-        {...restProps}
       />
     </SelectComponentContext.Provider>
   );
 }
 
-// 下拉浮层位置
-function PopperComponent(props: any) {
-  const { PopperComponent: PopperComponentFp } = React.useContext(
-    SelectComponentContext,
+export const usePropNameMap = (props: SelectProps) => {
+  const {
+    allowClear = true,
+    clearIcon: clearIconProp,
+    defaultActiveFirstOption = true,
+    disabled,
+    freeSolo: freeSoloProp = false,
+    limitTags,
+    loading,
+    multiple,
+    removeIcon,
+    style,
+    showArrow,
+    tagMode = false,
+  } = props;
+
+  const clearIcon = !allowClear ? null : clearIconProp || removeIcon;
+  const disableClearable = !allowClear;
+
+  const disableCloseOnSelect =
+    'disableCloseOnSelect' in props ? props.disableCloseOnSelect : !!multiple;
+
+  const popupIcon =
+    typeof showArrow === 'boolean' ? (showArrow ? undefined : null) : showArrow;
+
+  const forcePopupIcon: any = React.useMemo(() => {
+    if ('showArrow' in props) {
+      return !!showArrow;
+    }
+    return 'auto';
+  }, [showArrow]);
+
+  const autoHighlight = !!defaultActiveFirstOption;
+
+  const noOptionsText = props.notFoundContent;
+
+  const freeSolo = tagMode === true ? true : freeSoloProp;
+
+  return {
+    autoHighlight,
+    clearIcon,
+    disabled,
+    disableClearable,
+    disableCloseOnSelect,
+    forcePopupIcon,
+    freeSolo,
+    limitTags,
+    loading,
+    multiple,
+    noOptionsText,
+    popupIcon,
+    style,
+  };
+};
+
+export const useOptions = (props: SelectProps, { valueInner }: any) => {
+  const {
+    options: optionsProp,
+    labelMap = 'label',
+    valueMap = 'value',
+    value: valueProp,
+  } = props;
+
+  const value = 'value' in props ? valueProp : valueInner;
+
+  const operateOption = (
+    option: any,
+    labelMap: string,
+    valueMap: string,
+  ): OptionOperated => {
+    if (option !== null && typeof option === 'object') {
+      const label = option[labelMap];
+      const value = option[valueMap];
+      return { label, value };
+    }
+    return { label: option, value: option };
+  };
+
+  const optionsOperated: OptionOperatedList = React.useMemo(() => {
+    const defaultOptions: [] = [];
+
+    if (
+      !('options' in props) ||
+      optionsProp === null ||
+      optionsProp === undefined
+    )
+      return defaultOptions;
+
+    if (!Array.isArray(optionsProp))
+      throw new Error('Select Options must be array!');
+
+    return optionsProp.map((option) =>
+      operateOption(option, labelMap, valueMap),
+    );
+  }, [optionsProp, labelMap, valueMap]);
+
+  const valueOptions: OptionValueList = optionsOperated.map(
+    (option) => option.value,
   );
 
-  if (PopperComponentFp) return <PopperComponentFp {...props} />;
+  const optionsByValue = React.useMemo(() => {
+    return Array.isArray(value) ? value : [value];
+  }, [value]);
 
-  return <Popper {...props}></Popper>;
-}
+  const optionValueMapItem: OptionValueMapItem = React.useMemo(() => {
+    const result: any = {};
+    let optionList = [];
 
-// 下拉容器样式
-function PaperComponent(props: any) {
-  const { className, children, ...restProps } = props;
+    if (Array.isArray(optionsProp) && optionsProp.length) {
+      optionList = optionsProp;
+    }
+    if (Array.isArray(optionsProp) && !optionsProp.length && value) {
+      optionList = optionsByValue;
+    }
+
+    optionList.forEach((option: any) => {
+      const operated = operateOption(option, labelMap, valueMap);
+      const { value } = operated;
+      const valueKey = `${value}.${typeof value}`;
+      result[valueKey] = { operated, origin: option };
+    });
+
+    return result;
+  }, [optionsProp, optionsByValue, value, labelMap, valueMap]);
+
+  return { optionsOperated, valueOptions, optionValueMapItem };
+};
+
+export const useSelectValue = (props: SelectProps, { getOption }: any) => {
   const {
-    PaperComponent: PaperComponentFp,
-    dropdownClassName,
-    dropdownMatchSelectWidth = true,
-    dropdownStyle,
-    dropdownRender,
-    onPopupScroll,
-    onPopupScrollBottom,
+    defaultValue: defaultValueProp,
+    freeSolo = false,
+    labelInValue,
+    labelMap = 'label',
+    multiple,
+    onChange: onChangeProp,
+    value: valueProp,
+    valueMap = 'value',
+  } = props;
+
+  const defaultValue = React.useMemo(() => {
+    if (defaultValueProp === null || defaultValueProp === undefined)
+      return multiple ? [] : freeSolo ? '' : null;
+    if (labelInValue || typeof defaultValueProp === 'object')
+      return defaultValueProp[valueMap];
+    return defaultValueProp;
+  }, [defaultValueProp, multiple, freeSolo, valueMap]);
+
+  const [valueInner, setValueInner] = React.useState(defaultValue);
+
+  const valueObj = React.useMemo(() => {
+    if (!('value' in props)) return {};
+
+    if (valueProp === undefined || valueProp === null) {
+      const value = multiple ? [] : freeSolo ? '' : null;
+      return { value };
+    }
+
+    if (Array.isArray(valueProp)) {
+      if (labelInValue) {
+        const value = (valueProp as LabelInValuedValue[]).map((v) =>
+          v !== null && typeof v === 'object' ? v[valueMap] : v,
+        );
+        return { value };
+      }
+      return { value: valueProp };
+    }
+
+    if (labelInValue) {
+      const value =
+        valueProp !== null && typeof valueProp === 'object'
+          ? (valueProp as LabelInValuedValue)[valueMap]
+          : valueProp;
+      return { value };
+    }
+
+    return { value: valueProp };
+  }, [valueProp, multiple, labelInValue]);
+
+  function onChange(e: React.SyntheticEvent, newValue: any) {
+    let value = newValue;
+
+    if (Array.isArray(newValue)) {
+      if (labelInValue) {
+        value = newValue.map((v) => {
+          const { operated: operatedOption } = getOption(v);
+          return {
+            [labelMap]: operatedOption.label,
+            [valueMap]: operatedOption.value,
+          };
+        });
+      }
+    } else {
+      if (labelInValue) {
+        const { operated: operatedOption } = getOption(newValue);
+        value = {
+          [labelMap]: operatedOption.label,
+          [valueMap]: operatedOption.value,
+        };
+      }
+      if (
+        !labelInValue &&
+        newValue !== null &&
+        typeof newValue === 'object' &&
+        newValue[valueMap] !== undefined
+      ) {
+        value = newValue[valueMap];
+      }
+    }
+
+    setValueInner(value);
+    if (onChangeProp) onChangeProp(value, e);
+  }
+
+  const valueProps = { defaultValue, ...valueObj, onChange };
+
+  return { valueProps, valueInner };
+};
+
+export const useInputValue = (props: SelectProps, { onChange, value }: any) => {
+  const {
+    onSearch,
+    freeSolo = false,
+    multiple = false,
+    inputValue: inputValueProp,
+    onInputChange: onInputChangeProp,
+  } = props;
+
+  const [inputValueInner, setInputValue] = React.useState('');
+
+  const inputValueObj = React.useMemo(() => {
+    if ('inputValue' in props) return { inputValue: inputValueProp };
+    if (freeSolo && !multiple) return { inputValue: value };
+    return { inputValue: inputValueInner };
+  }, [inputValueInner, inputValueProp, freeSolo, multiple]);
+
+  function onInputChange(
+    e: React.SyntheticEvent,
+    newValue: any,
+    reason: 'input' | 'clear' | 'reset',
+  ) {
+    setInputValue(newValue);
+    if (freeSolo && !multiple) {
+      onChange(e, newValue);
+    }
+
+    if (onSearch && reason === 'input') {
+      onSearch(newValue);
+    }
+    if (onInputChangeProp) {
+      onInputChangeProp(newValue, reason, e);
+    }
+  }
+
+  return { ...inputValueObj, onInputChange };
+};
+
+export const useClassName = (props: SelectProps) => {
+  const { className, allowClear, fullWidth = true } = props;
+
+  const wrapClassNames = React.useMemo(() => {
+    return `${className} ${styles.selectWrap} ${
+      !!fullWidth && styles.selectFullWidth
+    } ${!allowClear && styles.notAllowClear}`
+      .replaceAll('undefined', '')
+      .replaceAll('false', '');
+  }, [allowClear, className, fullWidth]);
+
+  return wrapClassNames;
+};
+
+export const useSize = (props: SelectProps): 'small' | 'medium' => {
+  const defaultSize = 'small';
+  const { size = defaultSize } = props;
+
+  return React.useMemo(() => {
+    const sizeMap = {
+      small: 'small',
+      middle: 'medium',
+      medium: 'medium',
+    };
+    return sizeMap[size] as 'small' | 'medium';
+  }, [size]);
+};
+
+export const useDropdownOpen = (props: SelectProps) => {
+  const {
+    defaultOpen,
+    open: openProp,
+    onOpenChange,
+    onDropdownVisibleChange,
+  } = props;
+
+  const [openInner, setOpenInner] = React.useState(defaultOpen);
+
+  const open = React.useMemo(() => {
+    if ('open' in props) return openProp;
+    return openInner;
+  }, [openProp, openInner]);
+
+  const openChangeFn = onOpenChange || onDropdownVisibleChange;
+
+  const onClose = (e: any, reason: string) => {
+    if (openChangeFn) {
+      return openChangeFn(false, e, reason);
+    }
+    setOpenInner(false);
+  };
+
+  const onOpen = (e: any) => {
+    if (openChangeFn) {
+      return openChangeFn(true, e);
+    }
+    setOpenInner(true);
+  };
+
+  return { open, onClose, onOpen };
+};
+
+export function RenderInput(props: any) {
+  const {
+    placeholder,
+    variant = 'outlined',
+    label,
+    size,
+    showSearch: showSearchProp = true,
+    tagMode = false,
+    loading,
+    loadingIndicator,
   } = React.useContext(SelectComponentContext);
 
-  const classes = `${className} ${dropdownClassName} ${styles.dropdownWrap} ${
-    !dropdownMatchSelectWidth && styles.dropdownNotMatchSelectWidth
-  }`
+  const showSearch = tagMode === true ? true : showSearchProp;
+
+  const {
+    inputProps: inputPropsProp,
+    InputProps: InputPropsProp,
+    ...restProps
+  } = props;
+
+  const override_inputProps: any = {};
+  if (!showSearch) {
+    override_inputProps.unselectable = 'on';
+    override_inputProps.readOnly = true;
+    override_inputProps.style = { cursor: 'pointer' };
+  }
+  const inputProps = { ...inputPropsProp, ...override_inputProps };
+
+  const override_InputProps: any = {};
+  if (loading) {
+    override_InputProps.endAdornment = loadingIndicator || (
+      <CircularProgress
+        size={20}
+        color="primary"
+        style={{ position: 'absolute', right: 6 }}
+      />
+    );
+  }
+  const InputProps = { ...InputPropsProp, ...override_InputProps };
+
+  const newProps = {
+    ...restProps,
+    label,
+    size,
+    placeholder,
+    variant,
+    inputProps,
+    InputProps,
+  };
+
+  return <TextField {...newProps} />;
+}
+
+// 下拉框浮层组件
+export function PopperComponent(props: any) {
+  const {
+    PopperComponent: PopperComponentFp,
+    dropdownMatchSelectWidth = true,
+    disablePortal,
+  } = React.useContext(SelectComponentContext);
+
+  const { style: styleProp, ...restProps } = props;
+
+  const style = {
+    ...styleProp,
+    width: dropdownMatchSelectWidth ? styleProp.width : 'auto',
+  };
+
+  const newProps = {
+    ...restProps,
+    style,
+    disablePortal: !!disablePortal,
+    placement: 'bottom-start',
+  };
+
+  if (PopperComponentFp) return <PopperComponentFp {...newProps} />;
+
+  return <Popper {...newProps} />;
+}
+
+// 下拉框容器组件
+export function PaperComponent(props: any) {
+  const {
+    dropdownRender,
+    dropdownStyle,
+    dropdownClassName,
+    PaperComponent: PaperComponentProp,
+  } = React.useContext(SelectComponentContext);
+
+  const {
+    className: classNameProp,
+    children: childrenProp,
+    ...restProps
+  } = props;
+
+  const className = `${classNameProp} ${dropdownClassName}`
     .replaceAll('undefined', '')
     .replaceAll('false', '');
 
-  const dropdownStyles = {
-    height: 'auto',
-    maxHeight: '40vh',
-    overflow: 'auto',
-    ...(dropdownStyle || {}),
+  const style = dropdownStyle;
+
+  const children = dropdownRender ? dropdownRender(childrenProp) : childrenProp;
+
+  const onMouseDown = (e: any) => {
+    if (dropdownRender) e.preventDefault();
   };
 
-  const renderChildren = dropdownRender ? dropdownRender(children) : children;
+  const newProps = {
+    ...restProps,
+    className,
+    style,
+    children,
+    onMouseDown,
+  };
+
+  if (PaperComponentProp) return <PaperComponentProp {...newProps} />;
+
+  return <Paper {...newProps} />;
+}
+
+// 下拉框list容器组件
+export const ListboxComponent = React.forwardRef(function (props: any, ref) {
+  const {
+    listStyle,
+    listHeight = '40vh',
+    onPopupScroll,
+    onPopupScrollBottom,
+    ListboxComponent: ListboxComponentFp,
+  } = React.useContext(SelectComponentContext);
+
+  const { style: styleProp, ...restProps } = props;
+
+  const style = { ...styleProp, ...listStyle, maxHeight: listHeight };
 
   function onScroll(e: any) {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
-    const isScrollBottom = scrollTop + clientHeight === scrollHeight;
+    const isScrollBottom = scrollTop + clientHeight >= scrollHeight;
     if (onPopupScroll) onPopupScroll(e);
     if (isScrollBottom && onPopupScrollBottom) onPopupScrollBottom(e);
   }
 
-  if (PaperComponentFp) return <PaperComponentFp {...props} />;
+  const newProps = { ...restProps, ref, style, onScroll, role: undefined };
 
-  return (
-    <div
-      {...restProps}
-      className={classes}
-      style={dropdownStyles}
-      onScroll={onScroll}
-      onMouseDown={(e) => {
-        if (dropdownRender) e.preventDefault();
-      }}
-    >
-      {renderChildren}
-    </div>
-  );
-}
+  if (ListboxComponentFp) return <ListboxComponentFp {...newProps} />;
 
-// 下拉容器list
-const ListboxComponent = React.forwardRef(function (props: any, ref) {
-  const { ListboxComponent: ListboxComponentFp } = React.useContext(
-    SelectComponentContext,
-  );
-
-  const { ...restProps } = props;
-
-  if (ListboxComponentFp) return <ListboxComponentFp {...props} />;
-
-  return (
-    <ul
-      ref={ref}
-      {...restProps}
-      style={{ height: 'auto', maxHeight: 'none' }}
-    ></ul>
-  );
+  return <ul {...newProps} />;
 });
+
+export function OptionItem(props: any) {
+  const {
+    check,
+    getOption,
+    getOptionLabel: getOptionLabelProp,
+    highlight,
+    highlightOptions,
+    highlightStyle,
+    OptionComponent,
+    optionClassName,
+    optionStyle,
+  } = React.useContext(SelectComponentContext);
+
+  const { state, value, className: classNameProp, ...restProps } = props;
+  const { inputValue, selected } = state;
+
+  const className = `${classNameProp} ${optionClassName}`
+    .replaceAll('undefined', '')
+    .replaceAll('false', '');
+
+  const style = optionStyle;
+
+  const { operated: operatedOption, origin: originOption } = getOption(value);
+
+  const defaultLabel =
+    operatedOption.label ||
+    operatedOption.value ||
+    (value !== null && value !== undefined ? String(value) : '');
+
+  const matches = match(defaultLabel, inputValue || '', {
+    insideWords: true,
+    findAllOccurrences: false,
+    ...highlightOptions,
+  });
+
+  const parts = parse(defaultLabel, matches);
+
+  const highlightLabel =
+    highlight &&
+    parts.map((part: any, index: any) => {
+      const { highlight: isHighlight, text } = part;
+
+      const style = isHighlight
+        ? { color: 'red', fontWeight: 600, ...highlightStyle }
+        : undefined;
+
+      return (
+        <span key={index} style={style}>
+          {text}
+        </span>
+      );
+    });
+
+  const checkLabel = check && <Checkbox checked={selected} />;
+
+  const propLabel =
+    getOptionLabelProp && getOptionLabelProp(originOption, state, parts);
+
+  const children = (
+    <>
+      {checkLabel}
+      {propLabel || highlightLabel || defaultLabel}
+    </>
+  );
+
+  const newProps = { ...restProps, className, style, children };
+
+  if (OptionComponent) return <OptionComponent {...newProps} />;
+
+  return <li {...newProps} />;
+}
 
 export default Select;
