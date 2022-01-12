@@ -1,43 +1,43 @@
 import React from 'react';
-import { Select } from 'dtp-ops-components';
+import Select from '../Select';
 import { Button } from '@mui/material';
 
-const options = [
-  { label: 'Jack', value: 'Jack' },
-  { label: 'Lucy', value: 'Lucy' },
-  { label: 'Tom', value: 'Tom' },
-];
-
-function Size() {
+export default function Size() {
   const [size, setSize] = React.useState<any>('small');
 
   return (
-    <div style={{ display: 'inline-block', width: '50%' }}>
-      <div style={{ marginBottom: 20 }}>
+    <div>
+      <p>
         <Button
-          style={{ marginRight: 20 }}
+          style={{ margin: '0 20px 20px 0' }}
           variant="contained"
           onClick={() => setSize('small')}
         >
-          small
+          Small
         </Button>
         <Button
-          style={{ marginRight: 20 }}
+          style={{ margin: '0 20px 20px 0' }}
           variant="contained"
           onClick={() => setSize('middle')}
         >
-          middle
+          Middle
         </Button>
-      </div>
+      </p>
       <Select
-        allowClear
-        label={size}
         size={size}
-        options={options}
-        style={{ width: 300 }}
+        style={{ width: 300, margin: '0 20px 20px 0' }}
+        options={['Jack', 'Lucy', 'Tom']}
+        defaultValue={'Lucy'}
+      />
+
+      <Select
+        multiple
+        size={size}
+        limitTags={2}
+        style={{ width: 300, margin: '0 20px 20px 0' }}
+        options={['Jack', 'Lucy', 'Tom']}
+        defaultValue={['Jack', 'Lucy', 'Tom']}
       />
     </div>
   );
 }
-
-export default Size;

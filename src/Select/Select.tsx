@@ -1,19 +1,30 @@
-type RenderOptionsState = {
+type Option = { [key: string]: string | number } | string | number;
+type OptionList = [] | Option[];
+type LabelInValuedValue = Record<string, any>;
+type Value =
+  | undefined
+  | null
+  | number
+  | string
+  | LabelInValuedValue
+  | []
+  | (string | number | LabelInValuedValue)[];
+type OnChange = (value: Value, e: React.SyntheticEvent) => any;
+
+type OptionOperated = { label: any; value: any };
+type OptionValue = string | number;
+type OptionValueList = [] | (string | number)[];
+type OptionOperatedList = [] | OptionOperated[];
+type OptionValueMapItem = {
+  [valueKey: string]: { operated: OptionOperated; origin: Option };
+};
+
+type OptionState = {
   selected: boolean;
   inputValue: string | undefined;
 };
-type Option = Record<string, any>;
-type labelInValueOptionValue = Record<string, any>;
-type OptionValue =
-  | null
-  | undefined
-  | string
-  | number
-  | labelInValueOptionValue
-  | []
-  | string[]
-  | number[]
-  | labelInValueOptionValue[];
+
+type Style = React.CSSProperties;
 
 export interface SelectProps {
   allowClear?: boolean;
@@ -22,21 +33,22 @@ export interface SelectProps {
   check?: boolean;
   defaultActiveFirstOption?: boolean;
   defaultOpen?: boolean;
-  defaultValue?: string | number | string[] | number[] | [];
+  defaultValue?: any;
   disabled?: boolean;
   disableCloseOnSelect?: boolean;
   disablePortal?: boolean;
   dropdownClassName?: string;
   dropdownMatchSelectWidth?: boolean;
-  dropdownStyle?: React.CSSProperties;
-  dropdownRender?: (originNode: any) => any;
+  dropdownStyle?: Style;
+  dropdownRender?: (originList: any) => any;
   filterOption?: false | ((inputValue: string, option: Option) => boolean);
   fullWidth?: boolean;
   freeSolo?: boolean;
+  getInputFillText?: (option: Option) => string;
   getOptionDisabled?: (option: Option) => boolean;
   getOptionLabel?: (
     option: Option,
-    state: RenderOptionsState,
+    state: OptionState,
     parts?: any[],
   ) => React.ReactNode | undefined | null;
   groupBy?: (option: Option) => string;
@@ -59,7 +71,7 @@ export interface SelectProps {
   optionClassName?: string;
   optionStyle?: React.CSSProperties;
   OptionComponent?: any;
-  options?: Option[] | string[] | number[];
+  options?: OptionList;
   placeholder?: string;
   PaperComponent?: any;
   PopperComponent?: any;
@@ -67,27 +79,26 @@ export interface SelectProps {
   renderOption?: (
     option: Option,
     itemProps: any,
-    state: RenderOptionsState,
+    state: OptionState,
     parts?: any[],
   ) => any;
-  searchValue?: string;
-  showArrow?: boolean;
+  inputValue?: string;
+  showArrow?: boolean | React.ReactNode;
   size?: 'small' | 'middle' | 'medium';
   showSearch?: boolean;
-  style?: React.CSSProperties;
+  style?: Style;
+  tagMode?: boolean;
+  tagModePush?: boolean;
   valueMap?: string;
-  value?: OptionValue;
+  value?: Value;
   variant?: 'outlined' | 'filled' | 'standard';
-
-  onChange?: (
-    value: Pick<SelectProps, 'value'>,
-    e: React.SyntheticEvent,
-  ) => any;
-  onDropdownVisibleChange?: (open: boolean, reason?: string, e?: any) => any;
-  onOpenChange?: (open: boolean, reason?: string, e?: any) => any;
+  onChange?: OnChange;
+  onDropdownVisibleChange?: (visible: boolean, reason?: string, e?: any) => any;
+  onInputChange?: (inputValue: string, reason?: string, e?: any) => any;
+  onOpenChange?: (visible: boolean, reason?: string, e?: any) => any;
   onPopupScroll?: (e?: any) => any;
   onPopupScrollBottom?: (e?: any) => any;
-  onSearch?: (inputValue: string) => any;
+  onSearch?: (inputValue: string, reason?: string) => any;
 }
 
 import React from 'react';
@@ -110,11 +121,12 @@ const SelectComponentContext = React.createContext<any>({} as any);
 function Select(props: SelectProps) {
   const {
     filterOption: filterOptionProp,
-    freeSolo = false,
     getOptionDisabled: getOptionDisabledProp,
+    getInputFillText,
     groupBy: groupByProp,
     labelMap = 'label',
-    multiple = false,
+    options,
+    tagMode = false,
     valueMap = 'value',
   } = props;
 
@@ -130,6 +142,7 @@ function Select(props: SelectProps) {
 
   const inputValueProps = useInputValue(props, {
     onChange: valueProps.onChange,
+    value: valueProps.value,
   });
 
   const { optionsOperated, valueOptions, optionValueMapItem } = useOptions(
@@ -138,18 +151,18 @@ function Select(props: SelectProps) {
   );
 
   function getOption(
-    optionValue: string | number | labelInValueOptionValue | null | undefined,
+    optionValue: string | number | LabelInValuedValue | null | undefined,
   ): {
     operated: any;
     origin: any;
   } {
     const defaultOption = {
-      operated: { label: '', value: null },
-      origin: undefined,
+      operated: { label: undefined, value: optionValue },
+      origin: optionValue,
     };
     if (optionValue === null || optionValue === undefined) return defaultOption;
 
-    if (typeof optionValue === 'object') {
+    if (optionValue !== null && typeof optionValue === 'object') {
       const value = optionValue[valueMap];
       const valueKey = `${value}.${typeof value}`;
       return optionValueMapItem[valueKey] || optionValue;
@@ -160,18 +173,15 @@ function Select(props: SelectProps) {
   }
 
   function renderInputFillText(optionValue: string | number): string {
-    if (freeSolo) return String(optionValue);
-    const { operated: operatedOption } = getOption(optionValue);
+    const { operated: operatedOption, origin: originOption } =
+      getOption(optionValue);
+    if (getInputFillText) return getInputFillText(originOption);
     const defaultText = operatedOption.label;
     if (defaultText !== undefined && defaultText !== null) return defaultText;
     return String(optionValue);
   }
 
-  function renderOption(
-    props: any,
-    value: OptionValue,
-    state: RenderOptionsState,
-  ) {
+  function renderOption(props: any, value: OptionValue, state: OptionState) {
     const OptionProps = { ...props, state, value };
     return <OptionItem {...OptionProps} />;
   }
@@ -182,33 +192,40 @@ function Select(props: SelectProps) {
     return false;
   }
 
-  function filterOption(valueOptions: any, { inputValue }: any) {
+  function filterOptions(valueOptions: any, { inputValue }: any) {
     const defaultFilterFn = (inputValue: any, option: any) => {
       const label =
-        typeof option === 'object' ? option[labelMap] : String(option);
-      return label.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0;
+        option !== null && typeof option === 'object'
+          ? option[labelMap]
+          : option;
+      const stringLabel =
+        label === null || label === undefined ? '' : String(label);
+      return stringLabel.toLowerCase().indexOf(inputValue.toLowerCase()) >= 0;
     };
 
     const filterFn =
       typeof filterOptionProp === 'function'
         ? filterOptionProp
+        : filterOptionProp === false
+        ? null
         : defaultFilterFn;
 
-    const filtered = valueOptions.filter((optionValue: any) => {
-      const { origin: originOption } = getOption(optionValue);
-      return filterFn(inputValue || '', originOption);
-    });
+    const filtered = !filterFn
+      ? valueOptions
+      : valueOptions.filter((optionValue: any) => {
+          const { origin: originOption } = getOption(optionValue);
+          return filterFn(inputValue || '', originOption);
+        });
 
-    if (multiple && freeSolo && inputValue) {
+    if (tagMode) {
       const isInputValueInFiltered = !!filtered.filter((value: any) => {
         const { operated: operatedOption } = getOption(value);
         return value === inputValue || operatedOption.label === inputValue;
       })[0];
-      if (isInputValueInFiltered) return filtered;
+
+      if (isInputValueInFiltered || !inputValue) return filtered;
       return [...filtered, inputValue];
     }
-
-    if (filterOptionProp === false) return valueOptions;
 
     return filtered;
   }
@@ -245,7 +262,7 @@ function Select(props: SelectProps) {
         {...components}
         ChipProps={{ size }}
         className={className}
-        filterOptions={filterOption}
+        filterOptions={filterOptions}
         getOptionDisabled={getOptionDisabled}
         getOptionLabel={renderInputFillText}
         groupBy={groupByProp && groupBy}
@@ -262,9 +279,11 @@ export const usePropNameMap = (props: SelectProps) => {
     allowClear = true,
     clearIcon: clearIconProp,
     defaultActiveFirstOption = true,
-    freeSolo = false,
+    disabled,
+    freeSolo: freeSoloProp = false,
     limitTags,
     loading,
+    loadingText,
     multiple,
     removeIcon,
     style,
@@ -291,15 +310,19 @@ export const usePropNameMap = (props: SelectProps) => {
 
   const noOptionsText = props.notFoundContent;
 
+  const freeSolo = freeSoloProp;
+
   return {
     autoHighlight,
     clearIcon,
+    disabled,
     disableClearable,
     disableCloseOnSelect,
     forcePopupIcon,
     freeSolo,
     limitTags,
     loading,
+    loadingText,
     multiple,
     noOptionsText,
     popupIcon,
@@ -313,12 +336,18 @@ export const useOptions = (props: SelectProps, { valueInner }: any) => {
     labelMap = 'label',
     valueMap = 'value',
     value: valueProp,
+    tagMode = false,
+    tagModePush = true,
   } = props;
 
   const value = 'value' in props ? valueProp : valueInner;
 
-  const operateOption = (option: any, labelMap: string, valueMap: string) => {
-    if (typeof option === 'object') {
+  const operateOption = (
+    option: any,
+    labelMap: string,
+    valueMap: string,
+  ): OptionOperated => {
+    if (option !== null && typeof option === 'object') {
       const label = option[labelMap];
       const value = option[valueMap];
       return { label, value };
@@ -326,8 +355,8 @@ export const useOptions = (props: SelectProps, { valueInner }: any) => {
     return { label: option, value: option };
   };
 
-  const optionsOperated = React.useMemo(() => {
-    const defaultOptions: any[] = [];
+  const optionsOperated: OptionOperatedList = React.useMemo(() => {
+    const defaultOptions: [] = [];
 
     if (
       !('options' in props) ||
@@ -344,28 +373,41 @@ export const useOptions = (props: SelectProps, { valueInner }: any) => {
     );
   }, [optionsProp, labelMap, valueMap]);
 
-  const valueOptions = optionsOperated.map((option) => option.value);
+  const valueOptions: OptionValueList = React.useMemo(() => {
+    const optionValueList = optionsOperated.map((option) => option.value);
+    if (tagMode && tagModePush) {
+      const valueList = Array.isArray(value) ? value : [value];
+      const filteredValueList = valueList.filter(
+        (v) => !optionValueList.includes(v),
+      );
+      return optionValueList.concat(filteredValueList);
+    }
+    return optionValueList;
+  }, [optionsOperated, value, tagMode, tagModePush]);
 
   const optionsByValue = React.useMemo(() => {
     return Array.isArray(value) ? value : [value];
-  }, [value, labelMap, valueMap]);
+  }, [value]);
 
-  const optionValueMapItem = React.useMemo(() => {
+  const optionValueMapItem: OptionValueMapItem = React.useMemo(() => {
     const result: any = {};
     let optionList = [];
 
     if (Array.isArray(optionsProp) && optionsProp.length) {
       optionList = optionsProp;
     }
-    if (Array.isArray(optionsProp) && !optionsProp.length && value) {
+    if (
+      (!optionsProp && value) ||
+      (Array.isArray(optionsProp) && !optionsProp.length && value)
+    ) {
       optionList = optionsByValue;
     }
 
     optionList.forEach((option: any) => {
       const operated = operateOption(option, labelMap, valueMap);
       const { value } = operated;
-      const key = `${value}.${typeof value}`;
-      result[key] = { operated, origin: option };
+      const valueKey = `${value}.${typeof value}`;
+      result[valueKey] = { operated, origin: option };
     });
 
     return result;
@@ -376,7 +418,8 @@ export const useOptions = (props: SelectProps, { valueInner }: any) => {
 
 export const useSelectValue = (props: SelectProps, { getOption }: any) => {
   const {
-    defaultValue,
+    defaultValue: defaultValueProp,
+    freeSolo = false,
     labelInValue,
     labelMap = 'label',
     multiple,
@@ -385,35 +428,38 @@ export const useSelectValue = (props: SelectProps, { getOption }: any) => {
     valueMap = 'value',
   } = props;
 
-  const [valueInner, setValueInner] = React.useState(
-    defaultValue || (multiple ? [] : null),
+  const transferValue = React.useCallback(
+    (v: any) => {
+      if (v === undefined || v === null) {
+        return multiple ? [] : freeSolo ? '' : null;
+      }
+
+      if (Array.isArray(v)) {
+        if (labelInValue) {
+          return (v as LabelInValuedValue[]).map((item) =>
+            item !== null && typeof item === 'object' ? item[valueMap] : item,
+          );
+        }
+        return v;
+      }
+
+      if (labelInValue) {
+        return v !== null && typeof v === 'object'
+          ? (v as LabelInValuedValue)[valueMap]
+          : v;
+      }
+      return v;
+    },
+    [multiple, freeSolo, labelInValue, valueMap],
   );
 
-  const valueObj = React.useMemo(() => {
-    if (!('value' in props)) return {};
+  const defaultValue = transferValue(defaultValueProp);
 
-    if (valueProp === undefined || valueProp === null) {
-      const value = multiple ? [] : null;
-      return { value };
-    }
+  const [valueInner, setValueInner] = React.useState(defaultValue);
 
-    if (Array.isArray(valueProp)) {
-      if (labelInValue) {
-        const value = (valueProp as labelInValueOptionValue[]).map(
-          (v) => v[valueMap],
-        );
-        return { value };
-      }
-      return { value: valueProp };
-    }
+  const value = transferValue(valueProp);
 
-    if (labelInValue) {
-      const value = (valueProp as labelInValueOptionValue)[valueMap];
-      return { value };
-    }
-
-    return { value: valueProp };
-  }, [valueProp, multiple, labelInValue]);
+  const valueObj = 'value' in props ? { value } : {};
 
   function onChange(e: React.SyntheticEvent, newValue: any) {
     let value = newValue;
@@ -436,6 +482,14 @@ export const useSelectValue = (props: SelectProps, { getOption }: any) => {
           [valueMap]: operatedOption.value,
         };
       }
+      if (
+        !labelInValue &&
+        newValue !== null &&
+        typeof newValue === 'object' &&
+        newValue[valueMap] !== undefined
+      ) {
+        value = newValue[valueMap];
+      }
     }
 
     setValueInner(value);
@@ -447,29 +501,38 @@ export const useSelectValue = (props: SelectProps, { getOption }: any) => {
   return { valueProps, valueInner };
 };
 
-export const useInputValue = (props: SelectProps, { onChange }: any) => {
-  const { onSearch, freeSolo = false, multiple = false } = props;
+export const useInputValue = (props: SelectProps, { onChange, value }: any) => {
+  const {
+    onSearch,
+    freeSolo = false,
+    multiple = false,
+    inputValue: inputValueProp,
+    onInputChange: onInputChangeProp,
+  } = props;
 
   const [inputValueInner, setInputValue] = React.useState('');
 
   const inputValueObj = React.useMemo(() => {
+    if ('inputValue' in props) return { inputValue: inputValueProp };
+    if (freeSolo && !multiple) return { inputValue: value };
     return { inputValue: inputValueInner };
-  }, [inputValueInner]);
+  }, [inputValueInner, inputValueProp, freeSolo, multiple]);
 
   function onInputChange(
     e: React.SyntheticEvent,
     newValue: any,
     reason: 'input' | 'clear' | 'reset',
   ) {
+    setInputValue(newValue);
+    if (freeSolo && !multiple) {
+      onChange(e, newValue);
+    }
+
     if (onSearch && reason === 'input') {
       onSearch(newValue);
     }
-    setInputValue(newValue);
-
-    if (freeSolo) {
-      if (!multiple) {
-        onChange(e, newValue);
-      }
+    if (onInputChangeProp) {
+      onInputChangeProp(newValue, reason, e);
     }
   }
 
@@ -540,14 +603,19 @@ export const useDropdownOpen = (props: SelectProps) => {
 
 export function RenderInput(props: any) {
   const {
-    placeholder = 'Please Select',
-    variant = 'outlined',
+    freeSolo = false,
     label,
-    size,
-    showSearch = true,
     loading,
     loadingIndicator,
+    placeholder,
+    showSearch: showSearchProp = true,
+    size,
+    tagMode = false,
+    variant = 'outlined',
   } = React.useContext(SelectComponentContext);
+
+  const showSearch =
+    tagMode === true || freeSolo === true ? true : showSearchProp;
 
   const {
     inputProps: inputPropsProp,
@@ -565,12 +633,10 @@ export function RenderInput(props: any) {
 
   const override_InputProps: any = {};
   if (loading) {
-    override_InputProps.endAdornment = loadingIndicator || (
-      <CircularProgress
-        size={20}
-        color="primary"
-        style={{ position: 'absolute', right: 6 }}
-      />
+    override_InputProps.endAdornment = (
+      <div style={{ position: 'absolute', right: 6 }}>
+        {loadingIndicator || <CircularProgress size={20} color="primary" />}
+      </div>
     );
   }
   const InputProps = { ...InputPropsProp, ...override_InputProps };
@@ -707,7 +773,10 @@ export function OptionItem(props: any) {
 
   const { operated: operatedOption, origin: originOption } = getOption(value);
 
-  const defaultLabel = operatedOption.label || operatedOption.value || '';
+  const defaultLabel =
+    operatedOption.label ||
+    operatedOption.value ||
+    (value !== null && value !== undefined ? String(value) : '');
 
   const matches = match(defaultLabel, inputValue || '', {
     insideWords: true,
