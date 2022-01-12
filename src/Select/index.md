@@ -16,117 +16,29 @@ group:
 
 ## 代码演示
 
-<code src='./demo/basicUse.tsx' desc='基本使用。'></code>
+### 基本使用
 
-<code src='./demo/tagMode.tsx' desc='tags select，随意输入的内容'></code>
+<code desc='基本使用。' src='./demo/BasicUse.tsx'></code>
 
-### 允许清除 allowClear
+### 搜索框
 
-<code src='./demo/allowClear.tsx'></code>
+<code desc='带搜索框。搜索自带默认的过滤函数, 支持自定义的过滤函数, 也可以取消过滤' src='./demo/SearchSelect.tsx'></code>
 
-### 自动搜索高亮 highlight
+### 多选
 
-<code src='./demo/highlight.tsx'></code>
+<code desc='多选' src='./demo/MultipleSelect.tsx'></code>
 
-### 默认第一个高亮 defaultActiveFirstOption
+### size 大小
 
-<code src='./demo/defaultActiveFirstOption.tsx'></code>
+<code desc='两种大小' src='./demo/Size.tsx'></code>
 
-### 默认打开 defaultOpen
+### 回填内容
 
-<code src='./demo/defaultOpen.tsx'></code>
+<code desc='使用getInputFillText定制回填到input和标签里的内容' src='./demo/FillText.tsx'></code>
 
-### 默认值 defaultValue
+### tag Mode 自由输入
 
-<code src='./demo/defaultValue.tsx'></code>
-
-### 禁用 disabled
-
-<code src='./demo/disabled.tsx'></code>
-
-### 选中禁止关闭 disableCloseOnSelect
-
-<code src='./demo/disableCloseOnSelect.tsx'></code>
-
-### 下拉框渲染在父元素下 disablePortal
-
-<code src='./demo/disablePortal.tsx'></code>
-
-### 下拉框类名 dropdownClassName
-
-<code src='./demo/dropdownClassName.tsx'></code>
-
-### 下拉框样式 dropdownStyle
-
-<code src='./demo/dropdownStyle.tsx'></code>
-
-### 下拉框同宽 dropdownMatchSelectWidth
-
-<code src='./demo/dropdownMatchSelectWidth.tsx'></code>
-
-### 自定义下拉框 dropdownRender
-
-<code src='./demo/dropdownRender.tsx'></code>
-
-### 过滤搜索函数 filterOption
-
-<code src='./demo/filterOption.tsx'></code>
-
-### 禁用项 getOptionDisabled
-
-<code src='./demo/getOptionDisabled.tsx'></code>
-
-### 自定义 option 文本 getOptionLabel
-
-<code src='./demo/getOptionLabel.tsx'></code>
-
-### 分组 groupBy
-
-<code src='./demo/groupBy.tsx'></code>
-
-### 加载中 loading
-
-<code src='./demo/loading.tsx'></code>
-
-### 多选 multiple
-
-<code src='./demo/multiple.tsx'></code>
-
-### 控制下拉框显示 open
-
-<code src='./demo/open.tsx'></code>
-
-### 选项数组 options
-
-<code src='./demo/options.tsx'></code>
-
-### placeholder
-
-<code src='./demo/placeholder.tsx'></code>
-
-### 自定义清除按钮 removeIcon
-
-<code src='./demo/removeIcon.tsx'></code>
-
-### 自定义下拉按钮 showArrow
-
-<code src='./demo/showArrow.tsx'></code>
-
-### 输入框可输入 showSearch
-
-<code src='./demo/showSearch.tsx'></code>
-
-### 大小 size
-
-<code src='./demo/size.tsx'></code>
-
-### 输入框变体 variant
-
-<code src='./demo/variant.tsx'></code>
-
-### 下拉框滚动事件 onPopupScrollBottom
-
-<code src='./demo/onPopupScrollBottom.tsx'></code>
+<code desc='tags select，随意输入内容并添加到下拉项' src='./demo/TagMode.tsx'></code>
 
 ## API
 
