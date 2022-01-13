@@ -16,8 +16,6 @@ export default function TagMode() {
   return (
     <div>
       <Select
-        multiple
-        tagMode
         options={options}
         labelMap="name"
         valueMap="lastName"

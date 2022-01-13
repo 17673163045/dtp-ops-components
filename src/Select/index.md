@@ -40,6 +40,10 @@ group:
 
 <code desc='tags select，随意输入内容并添加到下拉项' src='./demo/TagMode.tsx'></code>
 
+### api 集合
+
+<code desc='api集合' src='./demo/Apis.tsx'></code>
+
 ## API
 
 ### Select props
